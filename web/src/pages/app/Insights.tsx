@@ -1,0 +1,19 @@
+import { Link } from 'react-router-dom';
+import { useWorkspace } from '../../workspace/useWorkspace';
+import './workspace.css';
+
+export default function Insights() {
+  const { activeInsights, activeTasks, activeProjects, activeActivities, activeCaptures, activeReflections } = useWorkspace();
+  const completedTasks = activeTasks.filter((task) => task.status === 'done').length;
+  const activeTaskCount = activeTasks.filter((task) => task.status !== 'done').length;
+  const linkedCaptures = activeCaptures.filter((capture) => capture.projectId || capture.goalId || capture.taskId).length;
+  const reflectionCount = activeReflections.filter((reflection) => reflection.type !== 'micro').length;
+  const evidence = [
+    `${activeActivities.length} 条 Workspace Event`,
+    `${completedTasks} 个任务完成，${activeTaskCount} 个仍在推进`,
+    `${activeCaptures.length} 条快速记录，其中 ${linkedCaptures} 条已关联工作对象`,
+  ];
+  const dynamicInsight = activeCaptures.length > 0 ? { title: linkedCaptures > 0 ? '你的判断正在回到具体工作里' : '先给这条记录一个工作对象', body: linkedCaptures > 0 ? '最近的快速记录已和任务、目标或项目连接。它们会成为复盘和下一步建议的可追溯证据。' : '你已经开始留下事实。下一次记录时关联一个任务或目标，系统才能把它转成更准确的下一步。', evidence, actionLabel: linkedCaptures > 0 ? '查看工作台活动' : '留下一条关联记录', tone: 'focus' as const } : null;
+  const cards = dynamicInsight ? [dynamicInsight, ...activeInsights] : activeInsights;
+  return <div className="page-stack"><header className="page-intro"><div><span className="section-kicker">GROWTH INSIGHTS</span><h2>看见正在发生的变化</h2><p>洞察来自真实的任务、学习、项目活动和复盘，不要求你额外填写一套成长数据。</p></div><Link to="/app/ai-coach" className="outline-action">和 AI 一起看 →</Link></header><section className="insights-score-band"><div className="insight-score-main"><span className="section-kicker">THIS WEEK</span><strong>{activeCaptures.length > 0 ? '事实正在累积' : '先留下第一条事实'}</strong><p>{activeCaptures.length > 0 ? '任务、记录与复盘已经可以相互解释，系统会据此逐渐收敛建议。' : '完成、卡点、想法和学习都可以从右下角快速记录开始。'}</p></div><div className="insight-score"><strong>{activeActivities.length}</strong><span>工作台事件</span></div><div className="insight-score"><strong>{completedTasks}</strong><span>完成任务</span></div><div className="insight-score"><strong>{activeCaptures.length}</strong><span>成长事实</span></div><div className="insight-score"><strong>{reflectionCount}</strong><span>晨晚复盘</span></div></section><div className="insights-grid"><div className="insight-card-list">{cards.map((insight) => <article className={`workspace-panel full-insight-card tone-insight-${insight.tone}`} key={insight.title}><div className="panel-header"><div><span className="section-kicker">{insight === dynamicInsight ? 'LIVE SIGNAL' : 'AI INSIGHT'}</span><h3>{insight.title}</h3></div><span className="insight-mark">✦</span></div><p>{insight.body}</p><div className="evidence-list">{insight.evidence.map((item) => <span key={item}>✓ {item}</span>)}</div><Link to={insight === dynamicInsight && linkedCaptures === 0 ? '/app/workspace' : '/app/workspace'} className="insight-action">{insight.actionLabel} →</Link></article>)}</div><aside className="insight-side"><section className="workspace-panel"><div className="panel-header"><div><span className="section-kicker">PROJECT MOMENTUM</span><h3>项目推进</h3></div></div>{activeProjects.map((project) => <div className="momentum-row" key={project.id}><div><strong>{project.name}</strong><small>{project.progress}% 完成</small></div><span className="mini-progress"><i style={{ width: `${project.progress}%`, background: project.accent }} /></span></div>)}</section><section className="workspace-panel evidence-panel"><span className="section-kicker">DATA COVERAGE</span><h3>当前样本覆盖</h3><p>{activeCaptures.length === 0 ? '尚未有快速记录。洞察会保守显示，避免基于不足数据下结论。' : `已有 ${activeCaptures.length} 条快速记录、${reflectionCount} 次晨晚复盘和 ${completedTasks} 个完成任务。`}</p><Link to="/app/workspace" className="text-button">查看活动来源 →</Link></section></aside></div></div>;
+}

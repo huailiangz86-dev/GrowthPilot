@@ -1,0 +1,33 @@
+# Compliance rules for AI output filtering (Red Line R-01)
+# All AI-generated content must pass through compliance_guard before reaching the user.
+
+banned_patterns:
+  # Direct investment advice
+  - pattern: "建议(买入|卖出|持有|加仓|减仓|清仓|建仓)"
+    replacement: "你可以思考一下这个方向"
+  - pattern: "应该(买|卖|持有|加仓)"
+    replacement: "你觉得这样做的理由充分吗"
+  - pattern: "推荐.*?(个股|标的|股票|基金)"
+    replacement: "你可以关注这个方向"
+
+  # Price predictions
+  - pattern: '目标价[位]?\s*\d+'
+    replacement: "价格走势取决于多种因素"
+  - pattern: '预计.*?(涨|跌).*?\d+%'
+    replacement: "未来走势存在不确定性"
+  - pattern: "(会|将|必)(涨|跌|破|站上)"
+    replacement: "存在多种可能性"
+
+  # Guaranteed returns
+  - pattern: "(保证|确保|一定|肯定).*?(收益|盈利|赚)"
+    replacement: "投资存在风险"
+  - pattern: "稳赚不赔"
+    replacement: "任何投资都有风险"
+
+  # Specific stock tips
+  - pattern: "(赶紧|快|抓紧)(买|卖|入手)"
+    replacement: "你可以根据自己的判断做决定"
+  - pattern: "不(买|入)就(亏|晚)了"
+    replacement: "每个人的决策节奏不同"
+
+disclaimer: "本内容由 AI 基于您的个人交易记录分析生成，不构成任何投资建议。"

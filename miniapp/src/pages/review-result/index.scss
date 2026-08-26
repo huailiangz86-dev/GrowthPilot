@@ -1,0 +1,37 @@
+.result-page {
+  min-height: 100vh; background: #f5f5f5;
+
+  .result-header { background: #fff; padding: 40px 20px 30px; text-align: center;
+    .result-icon { font-size: 64px; display: block; margin-bottom: 12px; }
+    .result-title { font-size: 36px; font-weight: 700; display: block; margin-bottom: 8px; }
+    .result-sub { font-size: 24px; color: #e74c3c; display: block; margin-bottom: 4px; }
+    .result-trade { font-size: 22px; color: #999; display: block; }
+  }
+
+  .rec-section { margin: 16px; background: #fff; border-radius: 14px; padding: 20px;
+    .rec-title { font-size: 28px; font-weight: 700; display: block; margin-bottom: 4px; }
+    .rec-desc { font-size: 22px; color: #999; display: block; margin-bottom: 16px; }
+    .rec-loading { font-size: 24px; color: #ccc; display: block; text-align: center; padding: 20px 0; }
+    .rec-empty { font-size: 24px; color: #ccc; display: block; text-align: center; padding: 20px 0; }
+  }
+
+  .rec-card { display: flex; align-items: center; gap: 12px; padding: 14px 0;
+    border-bottom: 1px solid #f5f5f5;
+    &:last-child { border-bottom: none; }
+    .rec-emoji { font-size: 32px; flex-shrink: 0; }
+    .rec-info { flex: 1; min-width: 0;
+      .rec-name { font-size: 26px; font-weight: 600; color: #333; display: block; }
+      .rec-reason { font-size: 22px; color: #999; margin-top: 4px; display: block; }
+    }
+    .rec-arrow { font-size: 24px; color: #ccc; }
+  }
+
+  .result-actions { display: flex; gap: 12px; margin: 16px;
+    .action-btn { flex: 1; background: #fff; border-radius: 44px; padding: 16px; text-align: center;
+      font-size: 28px; color: #666;
+      &.primary { background: #e74c3c; color: #fff; font-weight: 600; }
+    }
+  }
+
+  .disclaimer { margin: 16px; text-align: center; font-size: 20px; color: #ccc; }
+}

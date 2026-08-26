@@ -1,0 +1,57 @@
+.detail-page {
+  min-height: 100vh; background: #f5f5f5;
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 20px 12px; background: #fff;
+    .header-left {
+      .header-title { font-size: 32px; font-weight: 700; display: block; }
+      .header-date { font-size: 22px; color: #999; margin-top: 4px; display: block; }
+    }
+    .header-pnl { font-size: 36px; font-weight: 700; &.green { color: #52c41a; } &.red { color: #ff4d4f; } }
+  }
+
+  .tags-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 16px; background: #fff;
+    .tag { font-size: 22px; padding: 4px 14px; border-radius: 12px; background: #fff5f5; color: #e74c3c;
+      &.emotion { background: #fff7e6; color: #d48806; }
+    }
+  }
+
+  .kline-section { margin: 12px 16px; background: #fff; border-radius: 14px; padding: 16px;
+    .kline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      .kline-name { font-size: 26px; font-weight: 600; }
+      .period-tabs { display: flex; gap: 6px;
+        .period-tab { padding: 4px 14px; border-radius: 10px; font-size: 22px; color: #999; background: #f5f5f5;
+          &.active { background: #e74c3c; color: #fff; }
+        }
+      }
+    }
+
+    .kline-chart { display: flex; height: 280px; gap: 1px; align-items: stretch;
+      .candle { flex: 1; position: relative;
+        .wick { position: absolute; width: 1px; left: 50%; transform: translateX(-50%); }
+        .body { position: absolute; width: 60%; left: 20%; border-radius: 1px;
+          &.up { background: #ff4d4f; }
+          &.down { background: #52c41a; }
+        }
+        &.trade-day { background: rgba(22,119,255,0.06); border-radius: 3px;
+          .body { border: 1px solid #e74c3c; }
+        }
+        .marker { position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+          width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 6px solid #e74c3c;
+        }
+      }
+    }
+
+    .kline-footer { display: flex; justify-content: space-between; margin-top: 16px;
+      .kline-label { font-size: 20px; color: #bbb; }
+    }
+  }
+
+  .review-section { margin: 12px 16px; background: #fff; border-radius: 14px; padding: 16px;
+    .section-title { font-size: 26px; font-weight: 600; margin-bottom: 12px; display: block; }
+    .review-line { padding: 8px 0; border-left: 4px solid; padding-left: 12px; margin-bottom: 8px;
+      &.right { border-color: #52c41a; } &.wrong { border-color: #ff4d4f; }
+      .label { font-size: 22px; color: #999; display: block; }
+      .text { font-size: 26px; color: #333; margin-top: 4px; display: block; line-height: 1.5; }
+    }
+  }
+}

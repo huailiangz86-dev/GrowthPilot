@@ -1,0 +1,75 @@
+.record-page {
+  min-height: 100vh; background: #f5f5f5;
+
+  .up { color: #ff4d4f !important; }
+  .down { color: #52c41a !important; }
+
+  .view-switch { display: flex; background: #fff; padding: 10px 16px; gap: 8px;
+    .switch-btn { flex: 1; text-align: center; padding: 8px 0; border-radius: 20px; font-size: 26px; color: #999; background: #f5f5f5;
+      &.active { background: #e74c3c; color: #fff; }
+    }
+  }
+
+  .cat-tabs { display: flex; background: #fff; padding: 6px 16px; gap: 6px; border-bottom: 1px solid #f0f0f0;
+    .cat-tab { padding: 6px 16px; border-radius: 16px; font-size: 22px; color: #999; background: #f5f5f5;
+      &.active { background: #e74c3c; color: #fff; }
+    }
+  }
+
+  .list { padding: 10px 12px; height: calc(100vh - 200px);
+    .total { font-size: 20px; color: #ccc; margin-bottom: 6px; display: block; }
+    .empty { text-align: center; padding: 80px 0; .empty-text { font-size: 26px; color: #999; } }
+  }
+
+  .review-badge { background: #f0e6ff !important; color: #722ed1 !important; }
+  .review-card { border-left: 3px solid #722ed1;
+    .review-summary { font-size: 22px; color: #666; line-height: 1.5; }
+  }
+
+  .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 8px;
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start;
+      .card-title-row { display: flex; align-items: center; gap: 6px;
+        .scene-badge { font-size: 18px; padding: 2px 8px; border-radius: 6px; background: #fff5f5; color: #e74c3c; }
+        .card-title { font-size: 26px; font-weight: 600; }
+      }
+      .card-date { font-size: 20px; color: #bbb; margin-top: 2px; display: block; }
+      .pnl { font-size: 28px; font-weight: 700; }
+    }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px;
+      .tag { font-size: 18px; padding: 2px 8px; border-radius: 8px; background: #f5f5f5; color: #666;
+        &.emotion { background: #fff7e6; color: #d48806; }
+      }
+    }
+  }
+
+  // Calendar
+  .calendar-view {
+    .month-nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #fff;
+      .nav-arrow { font-size: 32px; color: #e74c3c; font-weight: 700; padding: 0 16px; }
+      .month-center { text-align: center;
+        .month-text { font-size: 28px; font-weight: 700; display: block; }
+        .month-pnl { font-size: 26px; font-weight: 700; display: block; margin-top: 2px; }
+      }
+    }
+    .weekdays { display: flex; background: #fff; border-bottom: 1px solid #f0f0f0; padding: 6px 0;
+      .wd { flex: 1; text-align: center; font-size: 20px; color: #999; }
+    }
+    .day-grid { display: flex; flex-wrap: wrap; padding: 4px;
+      .day-cell { width: calc(100% / 7); min-height: 100px; padding: 4px 2px; text-align: center; position: relative;
+        .day-num { font-size: 24px; color: #333; display: block; }
+        .today-num { color: #fff; background: #e74c3c; border-radius: 50%; width: 36px; height: 36px; line-height: 36px; margin: 0 auto; }
+        .day-pnl { font-size: 18px; display: block; margin-top: 2px; font-weight: 700; }
+        .review-dot { width: 6px; height: 6px; background: #e74c3c; border-radius: 50%; margin: 2px auto 0; }
+        &.profit { background: rgba(255,77,79,0.05); border-radius: 6px; }
+        &.loss { background: rgba(82,196,26,0.05); border-radius: 6px; }
+        &.empty { background: transparent; }
+      }
+    }
+  }
+
+  .fab { position: fixed; right: 28px; bottom: 150px; width: 88px; height: 88px; border-radius: 50%;
+    background: #e74c3c; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(22,119,255,0.4); z-index: 100;
+    .fab-icon { font-size: 44px; color: #fff; font-weight: 300; line-height: 1; }
+  }
+}

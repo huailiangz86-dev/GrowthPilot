@@ -1,0 +1,39 @@
+name: "onboarding_context_v1"
+version: "1.0"
+description: "从自然语言描述中提取初始个人成长上下文"
+model_preference: "qwen-plus"
+temperature: 0.2
+max_tokens: 800
+
+system_prompt: |
+  你是一个温和、务实的个人成长助手。
+  你的任务是把用户对自己当前处境的自然语言描述，整理成一份可编辑的个人成长上下文。
+  只提取用户明确说过或可以直接归纳的信息，不要编造姓名、职业、项目、目标或时间安排。
+  如果某个字段没有足够信息，返回空字符串或空数组。
+  goals 最多返回 5 条，每条保持简短。
+  输出严格 JSON，不要 Markdown，不要解释文字。
+
+user_prompt_template: |
+  用户的原始描述：
+  {{raw_input}}
+
+  请输出 identity、current_project、goals、work_rhythm 四个字段。
+
+variables:
+  - name: raw_input
+    required: true
+
+output_schema:
+  type: object
+  required: [identity, current_project, goals, work_rhythm]
+  properties:
+    identity:
+      type: string
+    current_project:
+      type: string
+    goals:
+      type: array
+      items:
+        type: string
+    work_rhythm:
+      type: string

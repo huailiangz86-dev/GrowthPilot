@@ -1,0 +1,54 @@
+// 国内配色: 红=涨(up), 绿=跌(down)
+.calendar-page {
+  min-height: 100vh; background: #f5f5f5;
+
+  .up { color: #ff4d4f !important; }
+  .down { color: #52c41a !important; }
+
+  .market-tabs { display: flex; background: #fff; padding: 10px 16px; gap: 8px; border-bottom: 1px solid #f0f0f0;
+    .market-tab { padding: 6px 18px; border-radius: 16px; font-size: 24px; color: #999; background: #f5f5f5;
+      &.active { background: #e74c3c; color: #fff; }
+    }
+  }
+
+  .month-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #fff;
+    .nav-btn { font-size: 36px; color: #e74c3c; padding: 0 16px; font-weight: 700; }
+    .month-info { text-align: center;
+      .month-title { font-size: 30px; font-weight: 700; display: block; }
+      .month-summary { margin-top: 6px;
+        .month-pnl { font-size: 28px; font-weight: 700; display: block; }
+        .month-trades { font-size: 20px; color: #999; display: block; margin-top: 2px; }
+      }
+    }
+  }
+
+  .weekdays { display: flex; background: #fff; border-bottom: 1px solid #f0f0f0; padding: 8px 0;
+    .weekday { flex: 1; text-align: center; font-size: 22px; color: #999; }
+  }
+
+  .day-grid { display: flex; flex-wrap: wrap; padding: 4px;
+    .day-cell { width: calc(100% / 7); min-height: 110px; padding: 6px 2px; text-align: center; position: relative;
+      .day-num { font-size: 26px; color: #333; display: block; }
+      .today-num { color: #fff; background: #e74c3c; border-radius: 50%; width: 40px; height: 40px; line-height: 40px; margin: 0 auto; }
+      .day-pnl { font-size: 18px; display: block; margin-top: 2px; font-weight: 700; }
+      .day-trades { font-size: 16px; color: #ccc; display: block; }
+      .review-dot { width: 8px; height: 8px; background: #e74c3c; border-radius: 50%; margin: 2px auto 0; }
+
+      &.empty { background: transparent; }
+      &.profit-day { background: rgba(255,77,79,0.06); border-radius: 6px; }
+      &.loss-day { background: rgba(82,196,26,0.06); border-radius: 6px; }
+      &.has-data { cursor: pointer; }
+    }
+  }
+
+  .legend { display: flex; gap: 16px; justify-content: center; padding: 12px; font-size: 20px; color: #999; flex-wrap: wrap;
+    .legend-item { display: flex; align-items: center; gap: 4px;
+      .dot { width: 10px; height: 10px; border-radius: 50%;
+        &.up-bg { background: rgba(255,77,79,0.3); }
+        &.down-bg { background: rgba(82,196,26,0.3); }
+      }
+      .review-dot { width: 8px; height: 8px; background: #e74c3c; border-radius: 50%; }
+      .hint { font-size: 18px; color: #bbb; }
+    }
+  }
+}

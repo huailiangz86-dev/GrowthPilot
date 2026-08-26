@@ -1,0 +1,75 @@
+.report-page {
+  min-height: 100vh; background: #f5f5f5;
+  .loading { text-align: center; padding: 80px 0; font-size: 28px; color: #999; display: block; }
+
+  .up { color: #ff4d4f !important; }
+  .down { color: #52c41a !important; }
+
+  .report-header { background: linear-gradient(135deg, #2c3e50, #34495e); padding: 30px 20px;
+    .report-title { font-size: 34px; font-weight: 700; color: #fff; display: block; }
+    .report-sub { font-size: 22px; color: rgba(255,255,255,0.5); margin-top: 6px; display: block; }
+  }
+
+  // Metrics
+  .metrics { display: flex; gap: 8px; padding: 12px; margin-top: -10px;
+    .metric-card { flex: 1; background: #fff; border-radius: 12px; padding: 16px 8px; text-align: center;
+      .metric-value { font-size: 32px; font-weight: 700; color: #333; display: block; }
+      .metric-label { font-size: 20px; color: #999; margin-top: 4px; display: block; }
+      .metric-delta { font-size: 20px; margin-top: 6px; display: block; color: #999; }
+    }
+  }
+
+  // Section
+  .section { margin: 12px 16px; background: #fff; border-radius: 14px; padding: 18px;
+    .section-title { font-size: 28px; font-weight: 600; color: #333; display: block; margin-bottom: 14px; }
+  }
+
+  // Progress rows
+  .progress-rows {
+    .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+      &:last-child { margin-bottom: 0; }
+      .pr-icon { font-size: 28px; flex-shrink: 0; }
+      .pr-info { flex: 1;
+        .pr-label { font-size: 24px; color: #666; display: block; margin-bottom: 6px; }
+        .pr-bar-wrap { height: 8px; background: #f0f0f0; border-radius: 4px;
+          .pr-bar { height: 100%; background: #e74c3c; border-radius: 4px;
+            &.blue { background: #2980b9; }
+          }
+        }
+      }
+      .pr-nums { text-align: right; flex-shrink: 0; min-width: 70px;
+        .pr-value { font-size: 24px; font-weight: 600; color: #333; display: block; }
+        .pr-delta { font-size: 20px; display: block; color: #999; }
+      }
+    }
+  }
+
+  // Emotion
+  .emotion-main { font-size: 24px; color: #666; display: block; margin-bottom: 12px; }
+  .emotion-bars {
+    .emotion-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+      .emo-name { font-size: 22px; color: #666; width: 60px; flex-shrink: 0; }
+      .emo-bar-wrap { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px;
+        .emo-bar { height: 100%; background: linear-gradient(90deg, #f39c12, #e74c3c); border-radius: 4px; }
+      }
+      .emo-count { font-size: 20px; color: #999; width: 40px; text-align: right; flex-shrink: 0; }
+    }
+  }
+
+  // Compare table
+  .compare-table {
+    .compare-header { display: flex; padding: 8px 0; border-bottom: 2px solid #f0f0f0;
+      .ch-label { flex: 2; font-size: 22px; color: #999; }
+      .ch-prev, .ch-cur, .ch-delta { flex: 1; font-size: 22px; color: #999; text-align: center; }
+    }
+    .compare-row { display: flex; padding: 10px 0; border-bottom: 1px solid #fafafa;
+      &:last-child { border-bottom: none; }
+      .cr-label { flex: 2; font-size: 24px; color: #333; }
+      .cr-prev { flex: 1; font-size: 24px; color: #999; text-align: center; }
+      .cr-cur { flex: 1; font-size: 24px; font-weight: 600; color: #333; text-align: center; }
+      .cr-delta { flex: 1; font-size: 22px; color: #999; text-align: center; }
+    }
+  }
+
+  .disclaimer { margin: 16px; text-align: center; font-size: 20px; color: #ccc; line-height: 1.5; }
+}

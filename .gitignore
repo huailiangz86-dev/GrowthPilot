@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+backend/.venv/
+backend/.env
+miniapp/.env*
+miniapp/node_modules/
+miniapp/dist/
+miniapp/.taro/
+.idea/
+.vscode/
+.DS_Store
+*.tar.gz

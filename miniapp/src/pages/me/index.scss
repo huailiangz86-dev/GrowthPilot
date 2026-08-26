@@ -1,0 +1,32 @@
+.me-page {
+  min-height: 100vh; background: #f5f5f5; padding: 16px;
+
+  .page-title { font-size: 30px; font-weight: 700; display: block; margin-bottom: 14px; }
+
+  .beta-badge { padding: 14px 16px; background: #fff; border-radius: 12px; margin-bottom: 12px;
+    font-size: 24px; color: #e74c3c; font-weight: 600;
+  }
+
+  .menu-group { background: #fff; border-radius: 12px; margin-bottom: 12px; overflow: hidden;
+    .menu-item { display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; border-bottom: 1px solid #f8f8f8;
+      &:last-child { border-bottom: none; }
+      .menu-info {
+        .menu-label { font-size: 24px; font-weight: 500; color: #333; display: block; }
+        .menu-desc { font-size: 20px; color: #999; margin-top: 2px; display: block; }
+      }
+      .menu-arrow { font-size: 22px; color: #ccc; }
+    }
+
+    .setting-item { display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; border-bottom: 1px solid #f8f8f8;
+      &:last-child { border-bottom: none; }
+      .setting-label { font-size: 24px; color: #333; }
+      .setting-value { font-size: 22px; color: #999; }
+    }
+  }
+
+  .promo-card { padding: 14px 16px; background: #fffbe6; border-radius: 12px;
+    font-size: 20px; color: #d48806; line-height: 1.5;
+  }
+}

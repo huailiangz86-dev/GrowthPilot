@@ -1,0 +1,391 @@
+.focus-page {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  color: var(--ink);
+  background: #f8faf6;
+}
+
+.focus-topbar {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 42px;
+  border-bottom: 1px solid var(--line);
+  background: rgb(255 255 253 / 88%);
+}
+
+.focus-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.focus-brand-mark {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #a7beb3;
+  border-radius: 8px;
+  color: var(--primary);
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.focus-workspace {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.focus-exit-link {
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 11px;
+}
+
+.focus-exit-link:hover {
+  color: var(--primary);
+}
+
+.focus-stage {
+  width: min(660px, calc(100% - 36px));
+  margin: auto;
+  padding: 42px 0 58px;
+  text-align: center;
+}
+
+.focus-stage-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+}
+
+.focus-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 0 4px var(--orange-soft);
+}
+
+.focus-context {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--muted-2);
+  font-size: 11px;
+}
+
+.focus-context i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted-2);
+}
+
+.focus-stage h1 {
+  max-width: 590px;
+  margin: 14px auto 0;
+  color: var(--ink);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: clamp(27px, 4vw, 42px);
+  font-weight: 500;
+  line-height: 1.28;
+}
+
+.focus-task-description {
+  max-width: 500px;
+  margin: 10px auto 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.focus-clock-wrap {
+  margin-top: 38px;
+}
+
+.focus-clock {
+  color: var(--primary);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: clamp(74px, 13vw, 132px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: .95;
+}
+
+.focus-clock-label {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted-2);
+  font-size: 11px;
+}
+
+.focus-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 26px auto 0;
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+.focus-progress-track {
+  height: 5px;
+  flex: 1;
+  overflow: hidden;
+  background: #e4ebe4;
+}
+
+.focus-progress-track span {
+  display: block;
+  width: var(--focus-progress);
+  height: 100%;
+  background: var(--orange);
+  transition: width 250ms ease;
+}
+
+.focus-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.focus-secondary-action,
+.focus-complete-action {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.focus-secondary-action {
+  color: var(--primary);
+  background: #fff;
+}
+
+.focus-secondary-action:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.focus-complete-action {
+  border-color: var(--primary);
+  color: #fff;
+  background: var(--primary);
+}
+
+.focus-complete-action:hover {
+  background: var(--primary-dark);
+}
+
+.focus-secondary-action span,
+.focus-complete-action span {
+  font-size: 13px;
+}
+
+.focus-capture {
+  margin-top: 46px;
+  padding: 18px 20px 16px;
+  border-top: 2px solid var(--green);
+  border-bottom: 1px solid var(--line-strong);
+  background: #fff;
+  text-align: left;
+}
+
+.focus-capture-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.focus-capture-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.focus-capture-heading strong {
+  color: var(--ink);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.focus-capture-heading > span {
+  color: var(--green);
+  font-size: 10px;
+}
+
+.focus-capture-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.focus-capture-form input {
+  min-width: 0;
+  min-height: 38px;
+  flex: 1;
+  padding: 0 11px;
+  border: 1px solid var(--line-strong);
+  outline: 0;
+  color: var(--ink);
+  background: #fbfcfa;
+  font-size: 11px;
+}
+
+.focus-capture-form input:focus {
+  border-color: #9ebbb0;
+  background: #fff;
+}
+
+.focus-capture-submit {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--primary);
+  color: #fff;
+  background: var(--primary);
+  font-size: 17px;
+}
+
+.focus-capture-submit:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.focus-capture-submit:disabled {
+  cursor: not-allowed;
+  border-color: var(--line);
+  color: var(--muted-2);
+  background: #eef2ed;
+}
+
+.focus-capture > small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+.focus-empty-page {
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.focus-empty-mark {
+  color: var(--orange);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 42px;
+}
+
+.focus-empty-page h1 {
+  margin-top: 13px;
+  color: var(--ink);
+  font-family: Georgia, 'Songti SC', serif;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.focus-empty-page p {
+  max-width: 340px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.focus-empty-page .primary-action {
+  margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+  .focus-topbar {
+    min-height: 60px;
+    padding: 0 18px;
+  }
+
+  .focus-workspace {
+    overflow: hidden;
+    max-width: 40%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .focus-stage {
+    width: min(100% - 28px, 660px);
+    padding: 30px 0 36px;
+  }
+
+  .focus-context {
+    flex-wrap: wrap;
+    margin-top: 22px;
+  }
+
+  .focus-stage h1 {
+    font-size: 29px;
+  }
+
+  .focus-clock-wrap {
+    margin-top: 32px;
+  }
+
+  .focus-clock {
+    font-size: 82px;
+  }
+
+  .focus-progress-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .focus-progress-track {
+    width: 100%;
+  }
+
+  .focus-actions {
+    margin-top: 25px;
+  }
+
+  .focus-secondary-action,
+  .focus-complete-action {
+    flex: 1;
+    padding: 0 10px;
+  }
+
+  .focus-capture {
+    margin-top: 38px;
+    padding: 17px 14px 15px;
+  }
+}

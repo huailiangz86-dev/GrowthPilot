@@ -1,0 +1,73 @@
+.form-page {
+  min-height: 100vh; background: #f5f5f5; padding: 16px;
+
+  .scene-row { display: flex; gap: 12px; margin-bottom: 16px;
+    .scene-btn { flex: 1; text-align: center; padding: 16px 0; background: #fff; border-radius: 14px; border: 2px solid transparent;
+      .scene-icon { font-size: 32px; display: block; }
+      .scene-label { font-size: 22px; color: #999; display: block; margin-top: 4px; }
+      &.active { border-color: #e74c3c; background: #fff5f5;
+        .scene-label { color: #e74c3c; font-weight: 600; }
+      }
+    }
+  }
+
+  .smart-input { margin-bottom: 12px;
+    .smart-row { display: flex; gap: 10px;
+      .smart-btn { flex: 1; text-align: center; padding: 14px; background: #fff; border-radius: 12px;
+        font-size: 24px; color: #e74c3c; border: 1px dashed #e74c3c; }
+    }
+  }
+
+  .fields { margin-bottom: 16px;
+    .dir-row { display: flex; gap: 12px; margin-bottom: 12px;
+      .dir-btn { flex: 1; height: 72px; line-height: 72px; text-align: center; border-radius: 12px; background: #fff; color: #999; font-size: 28px;
+        &.buy { background: #f6ffed; color: #52c41a; border: 2px solid #52c41a; }
+        &.sell { background: #fff1f0; color: #ff4d4f; border: 2px solid #ff4d4f; }
+      }
+    }
+    .market-row { display: flex; gap: 10px; margin-bottom: 12px;
+      .market-btn { flex: 1; height: 60px; line-height: 60px; text-align: center; border-radius: 10px; background: #fff; color: #999; font-size: 24px; border: 1px solid #eee;
+        &.active { background: #fff5f5; color: #e74c3c; border-color: #e74c3c; font-weight: 600; }
+      }
+    }
+    .search-wrapper { position: relative; margin-bottom: 10px;
+      .search-dropdown { position: absolute; top: 78px; left: 0; right: 0; background: #fff; border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12); z-index: 50; max-height: 400px; overflow-y: auto;
+        .search-item { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f5f5f5;
+          &:last-child { border-bottom: none; }
+          .search-name { font-size: 28px; color: #333; }
+          .search-code { font-size: 22px; color: #999; }
+        }
+      }
+    }
+    .input { height: 76px; background: #fff; border-radius: 12px; padding: 0 20px; font-size: 28px; margin-bottom: 10px;
+      &.large { font-size: 40px; height: 100px; text-align: center; font-weight: 700; }
+    }
+    .row { display: flex; gap: 10px; .half { flex: 1; } }
+  }
+
+  .section { margin-bottom: 16px;
+    .section-title { font-size: 26px; color: #666; margin-bottom: 10px; display: block; }
+  }
+
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 10px;
+    .tag { padding: 10px 20px; background: #fff; border-radius: 20px; font-size: 24px; color: #666; border: 1px solid #eee;
+      &.selected { background: #fff5f5; color: #e74c3c; border-color: #e74c3c; }
+      &.emotion.selected { background: #fff7e6; color: #d48806; border-color: #d48806; }
+    }
+  }
+
+  .review-section { margin: 16px 0;
+    .review-toggle { text-align: center; padding: 16px; background: #fff; border-radius: 12px;
+      .review-toggle-text { font-size: 26px; color: #e74c3c; }
+    }
+    .review-fields { margin-top: 10px;
+      .review-input { width: 100%; min-height: 80px; background: #fff; border-radius: 10px; padding: 14px; font-size: 26px; margin-bottom: 8px; box-sizing: border-box; }
+    }
+  }
+
+  .submit-btn { margin-top: 16px; height: 88px; line-height: 88px; background: #e74c3c; color: #fff;
+    font-size: 32px; border-radius: 44px; border: none;
+    &[disabled] { background: #bbb; }
+  }
+}

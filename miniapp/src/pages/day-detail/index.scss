@@ -1,0 +1,55 @@
+.day-detail {
+  min-height: 100vh; background: #f5f5f5;
+
+  .day-header { background: #fff; padding: 24px;
+    .day-date { font-size: 32px; font-weight: 700; display: block; }
+    .day-summary { display: flex; gap: 24px; margin-top: 16px;
+      .sum-item { text-align: center;
+        .sum-val { font-size: 32px; font-weight: 700; display: block;
+          &.green { color: #52c41a; }
+          &.red { color: #ff4d4f; }
+        }
+        .sum-label { font-size: 22px; color: #999; display: block; margin-top: 4px; }
+      }
+    }
+  }
+
+  .content { padding: 16px 24px; height: calc(100vh - 180px); }
+
+  .section { margin-bottom: 20px;
+    .section-title { font-size: 28px; font-weight: 600; margin-bottom: 12px; display: block; }
+  }
+
+  .trade-item { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 8px;
+    .trade-top { display: flex; justify-content: space-between; align-items: flex-start;
+      .trade-dir { font-size: 22px; font-weight: 600; padding: 2px 10px; border-radius: 8px; margin-right: 8px;
+        &.buy { background: #f6ffed; color: #52c41a; }
+        &.sell { background: #fff1f0; color: #ff4d4f; }
+      }
+      .trade-name { font-size: 28px; font-weight: 600; }
+      .trade-time { font-size: 22px; color: #bbb; margin-left: 8px; }
+      .trade-pnl { font-size: 30px; font-weight: 700;
+        &.green { color: #52c41a; }
+        &.red { color: #ff4d4f; }
+      }
+    }
+    .trade-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+      .tag { font-size: 20px; padding: 2px 10px; border-radius: 10px; background: #fff5f5; color: #e74c3c;
+        &.emotion { background: #fff7e6; color: #d48806; }
+      }
+    }
+  }
+
+  .review-item { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 8px;
+    .review-line { padding: 8px 0; border-left: 4px solid; padding-left: 12px; margin-bottom: 8px;
+      &.right { border-color: #52c41a; }
+      &.wrong { border-color: #ff4d4f; }
+      &.plan { border-color: #e74c3c; }
+      .line-label { font-size: 22px; color: #999; display: block; }
+      .line-text { font-size: 26px; color: #333; margin-top: 4px; display: block; line-height: 1.5; }
+    }
+    .review-notes { font-size: 24px; color: #666; margin-top: 8px; display: block; }
+  }
+
+  .empty { text-align: center; padding: 80px 0; color: #999; font-size: 28px; }
+}

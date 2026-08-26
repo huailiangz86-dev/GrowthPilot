@@ -1,0 +1,102 @@
+name: "persona_v1"
+version: "1.0"
+description: "交易人格分析 — 5维度评分 + 6种人格分类"
+model_preference: "qwen-plus"
+temperature: 0.3
+max_tokens: 1500
+
+system_prompt: |
+  你是一位专业的交易行为分析师。根据用户的交易记录数据，分析其交易人格。
+
+  5个评分维度（0-100分）：
+  1. risk_appetite（风险偏好）：高分=偏好高风险高回报，低分=保守稳健
+  2. time_frame（时间框架）：高分=长线持有，低分=短线频繁
+  3. emotion_stability（情绪稳定度）：高分=冷静理性，低分=情绪化
+  4. decision_speed（决策速度）：高分=果断快速，低分=犹豫观望
+  5. market_sensitivity（市场敏感度）：高分=紧跟热点，低分=独立判断
+
+  6种人格类型（必须使用以下正面命名，不允许负面标签）：
+  - 趋势猎手：擅长顺势交易，捕捉趋势行情
+  - 价值守望者：注重基本面，耐心持有等待价值回归
+  - 逆向先锋：善于在极端情绪时反向操作
+  - 波段冲浪者：灵活把握波段节奏
+  - 事件捕手：对市场热点和事件驱动敏感
+  - 稳健行者：风险控制严格，追求稳定收益
+
+  弱点不要用负面标签，用"成长方向"正面表述。
+
+  输出严格 JSON，不要其他文字。
+
+user_prompt_template: |
+  以下是该交易者的统计数据：
+  - 总交易笔数：{{total_trades}}
+  - 胜率：{{win_rate}}%
+  - 盈亏比：{{pnl_ratio}}
+  - 平均持仓天数：{{avg_holding_days}}
+  - 情绪分布：{{emotion_distribution}}
+  - 最常交易的标的：{{top_symbols}}
+  - 最近交易摘要：{{recent_trades_summary}}
+
+  请分析并输出 JSON。
+
+variables:
+  - name: total_trades
+    required: true
+  - name: win_rate
+    required: true
+  - name: pnl_ratio
+    required: true
+  - name: avg_holding_days
+    required: true
+  - name: emotion_distribution
+    required: true
+  - name: top_symbols
+    required: true
+  - name: recent_trades_summary
+    required: true
+
+output_schema:
+  type: object
+  required: [persona_type, dimensions, strengths, growth_directions, summary]
+  properties:
+    persona_type:
+      type: string
+      enum: ["趋势猎手", "价值守望者", "逆向先锋", "波段冲浪者", "事件捕手", "稳健行者"]
+    dimensions:
+      type: object
+      required: [risk_appetite, time_frame, emotion_stability, decision_speed, market_sensitivity]
+      properties:
+        risk_appetite: { type: integer, minimum: 0, maximum: 100 }
+        time_frame: { type: integer, minimum: 0, maximum: 100 }
+        emotion_stability: { type: integer, minimum: 0, maximum: 100 }
+        decision_speed: { type: integer, minimum: 0, maximum: 100 }
+        market_sensitivity: { type: integer, minimum: 0, maximum: 100 }
+    strengths:
+      type: array
+      items: { type: string }
+    growth_directions:
+      type: array
+      items: { type: string }
+    summary:
+      type: string
+
+examples:
+  - input:
+      total_trades: "45"
+      win_rate: "58"
+      pnl_ratio: "1.8"
+      avg_holding_days: "12"
+      emotion_distribution: "冷静60% 乐观25% 恐惧15%"
+      top_symbols: "贵州茅台, 宁德时代, 比亚迪"
+      recent_trades_summary: "近期以白酒和新能源为主，顺势加仓为主"
+    output:
+      persona_type: "趋势猎手"
+      dimensions:
+        risk_appetite: 65
+        time_frame: 55
+        emotion_stability: 78
+        decision_speed: 70
+        market_sensitivity: 60
+      strengths: ["顺势交易能力强", "情绪管理较好", "持仓耐心"]
+      growth_directions: ["可以关注逆向机会", "适当分散行业集中度"]
+      summary: "你是一位成熟的趋势猎手，擅长在上升趋势中把握机会，情绪控制能力出色。"

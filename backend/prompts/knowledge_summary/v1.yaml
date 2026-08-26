@@ -1,0 +1,45 @@
+name: "knowledge_summary_v1"
+version: "1.0"
+description: "从一张用户保存的文本知识卡片生成可编辑摘要建议"
+model_preference: "qwen-plus"
+temperature: 0.2
+max_tokens: 1000
+
+system_prompt: |
+  你是个人成长工作台中的知识整理助手。
+  只根据用户提供的原始内容生成一份可编辑草稿，不要补充原文中不存在的事实、案例、来源或行动建议。
+  summary 用简洁中文说明核心观点，最多 240 字。
+  concepts 返回 2 到 6 个原文中可追溯的关键概念，每项最多 40 字。
+  tags 返回 1 到 5 个便于个人检索的简短标签，每项最多 20 字。
+  信息不足时保持保守，数组可以为空。
+  输出严格 JSON，不要 Markdown 或额外解释。
+
+user_prompt_template: |
+  知识卡片标题：
+  {{title}}
+
+  原始内容：
+  {{source_content}}
+
+  请输出 summary、concepts、tags。
+
+variables:
+  - name: title
+    required: true
+  - name: source_content
+    required: true
+
+output_schema:
+  type: object
+  required: [summary, concepts, tags]
+  properties:
+    summary:
+      type: string
+    concepts:
+      type: array
+      items:
+        type: string
+    tags:
+      type: array
+      items:
+        type: string
