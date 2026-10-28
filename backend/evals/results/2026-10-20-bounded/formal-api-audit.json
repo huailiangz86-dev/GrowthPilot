@@ -1,0 +1,58 @@
+[
+  {
+    "id": "649c0966-0094-460e-b5b6-94587e1db076",
+    "user_id": "00aaeba5-c666-4752-aae0-8e05db63826a",
+    "purpose": "learning_diagnosis",
+    "model": "qwen-plus",
+    "prompt_version": "v3",
+    "input_tokens": 564,
+    "output_tokens": 24,
+    "cost_yuan": 0.000499,
+    "latency_ms": 1163,
+    "status": "success",
+    "error_message": null,
+    "created_at": "2026-10-20 07:39:41.221764+00:00"
+  },
+  {
+    "id": "75a974fb-10b7-4ecf-9e0c-8bc77ed6fdb8",
+    "user_id": "59c932ca-affa-411c-87f0-c46e5fea55ac",
+    "purpose": "learning_diagnosis",
+    "model": "qwen-plus",
+    "prompt_version": "v3",
+    "input_tokens": 562,
+    "output_tokens": 24,
+    "cost_yuan": 0.000498,
+    "latency_ms": 1053,
+    "status": "success",
+    "error_message": null,
+    "created_at": "2026-10-20 07:41:14.953272+00:00"
+  },
+  {
+    "id": "8baed876-002e-44c4-9536-6f52a6ad663e",
+    "user_id": "8232afe0-d663-43e6-b9a1-292357d17990",
+    "purpose": "learning_diagnosis",
+    "model": "qwen-plus",
+    "prompt_version": "v3",
+    "input_tokens": 560,
+    "output_tokens": 24,
+    "cost_yuan": 0.000496,
+    "latency_ms": 900,
+    "status": "success",
+    "error_message": null,
+    "created_at": "2026-10-20 07:42:38.707128+00:00"
+  },
+  {
+    "id": "63eb4abe-eab5-40c6-ac52-48497c0ed5f9",
+    "user_id": "8232afe0-d663-43e6-b9a1-292357d17990",
+    "purpose": "source_summary",
+    "model": "qwen-plus",
+    "prompt_version": "v2",
+    "input_tokens": 315,
+    "output_tokens": 19,
+    "cost_yuan": 0.00029,
+    "latency_ms": 881,
+    "status": "success",
+    "error_message": null,
+    "created_at": "2026-10-20 07:43:40.973478+00:00"
+  }
+]

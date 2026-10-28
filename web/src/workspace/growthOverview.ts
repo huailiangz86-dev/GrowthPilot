@@ -1,4 +1,13 @@
 import type { Goal, GrowthPlan, LearningItem, Reflection, Task } from './workspaceData';
+import { shiftLocalDateKey } from './dailyPreferences.ts';
+
+export function recentReflectionDays(reflections: Pick<Reflection, 'type' | 'reflectionDate'>[], timezone: string, now = new Date()) {
+  const recorded = new Set(reflections.filter(item => item.type === 'morning' || item.type === 'evening').map(item => item.reflectionDate));
+  return Array.from({length: 7}, (_, index) => {
+    const date = shiftLocalDateKey(timezone, index - 6, now);
+    return {date, label: new Intl.DateTimeFormat('zh-CN', {weekday: 'short', timeZone: 'UTC'}).format(new Date(`${date}T12:00:00Z`)), recorded: recorded.has(date)};
+  });
+}
 
 export interface GrowthOverview {
   goalProgress: number | null;

@@ -18,6 +18,7 @@ export interface OnboardingPreview {
 }
 
 export interface OnboardingCompletionPayload {
+  client_request_id?: string;
   raw_input: string;
   profile: OnboardingPreview['profile'];
   workspace?: {
@@ -30,6 +31,10 @@ export interface OnboardingCompletionPayload {
     description: string;
     next_action: string;
   };
+  goal?: {title: string; description: string; target_metric: {horizon_label: string}};
+  plan?: {title: string; description: string; period_type: 'weekly'; total_weeks: number; milestones: string[]};
+  tasks?: Array<{client_key: string; title: string; description: string; priority: string; due_at: string | null}>;
+  learning?: {title: string; summary: string; kind: string; duration_minutes: number | null};
 }
 
 function extractFocus(rawInput: string) {
@@ -54,12 +59,14 @@ export function createOnboardingCompletionPayload(
   draft: OnboardingDraft,
   selected: OnboardingSelection,
   rawInput: string,
+  requestId?: string,
+  dueDates: Array<string | null> = [],
 ): OnboardingCompletionPayload {
   const profile = {
-    identity: draft.project.description,
-    current_project: draft.project.name,
-    goals: [draft.goal.title],
-    work_rhythm: draft.plan.description,
+    identity: draft.project.description.slice(0, 200),
+    current_project: selected.project ? draft.project.name.slice(0, 300) : '',
+    goals: selected.goal ? [draft.goal.title] : [],
+    work_rhythm: selected.plan && selected.goal ? draft.plan.description.slice(0, 300) : '',
   };
   const payload: OnboardingCompletionPayload = {
     raw_input: rawInput.trim(),
@@ -79,6 +86,14 @@ export function createOnboardingCompletionPayload(
       description: draft.project.description,
       next_action: draft.project.nextAction,
     };
+  }
+  if (requestId) {
+    payload.client_request_id = requestId;
+    if (selected.goal) payload.goal = {title: draft.goal.title, description: draft.goal.description, target_metric: {horizon_label: draft.goal.horizon}};
+    if (selected.plan && selected.goal) payload.plan = {title: draft.plan.title, description: draft.plan.description, period_type: 'weekly', total_weeks: draft.plan.totalWeeks, milestones: draft.plan.milestones};
+    payload.tasks = draft.tasks.flatMap((task, index) => selected.tasks[index] ? [{client_key: `task-${index}`, title: task.title, description: task.description, priority: task.priority, due_at: dueDates[index] ?? null}] : []);
+    const minutes = /^\s*(\d+)\s*分钟\s*$/.exec(draft.learning.durationLabel);
+    if (selected.learning) payload.learning = {title: draft.learning.title, summary: draft.learning.summary, kind: draft.learning.kind, duration_minutes: minutes && Number(minutes[1]) <= 1440 && Number(minutes[1]) > 0 ? Number(minutes[1]) : null};
   }
   return payload;
 }

@@ -1,12 +1,13 @@
+import { ProjectsPanel } from '../../projects/Projects';
 import { Link } from 'react-router-dom';
 import { useWorkspace } from '../../workspace/useWorkspace';
 import './workspace.css';
 
 const RESOURCE_LINKS = [
-  { icon: '▣', name: '产品目录', detail: 'PRD、方案与决策记录', tone: 'teal', to: '/app/ai-coach' },
-  { icon: '◫', name: '设计资料', detail: 'UX、原型与参考素材', tone: 'orange', to: '/app/knowledge' },
-  { icon: '⌁', name: '研究输入', detail: '竞品、文章与用户观察', tone: 'blue', to: '/app/knowledge' },
-  { icon: '↗', name: '最近产出', detail: '这周完成的文件与结论', tone: 'green', to: '/app/tasks' },
+  { icon: '▣', name: '个人资料', detail: '查看本人保存的原资料与版本', tone: 'teal', to: '/app/knowledge/sources' },
+  { icon: '◫', name: '总结与成果', detail: '回查有出处的总结和原文', tone: 'orange', to: '/app/knowledge/summaries' },
+  { icon: '⌁', name: '学习记录', detail: '笔记、问题与实际练习', tone: 'blue', to: '/app/learning' },
+  { icon: '↗', name: '工作与成果', detail: '进入工作正文和实际结果', tone: 'green', to: '/app/tasks' },
 ];
 
 export default function Workspace() {
@@ -29,15 +30,10 @@ export default function Workspace() {
 
       <div className="workspace-page-grid">
         <div className="workspace-page-main">
-          <section className="workspace-panel">
-            <div className="panel-header"><div><span className="section-kicker">PROJECTS</span><h3>项目与进行中内容</h3></div><Link to="/app/ai-coach" className="small-action">＋ 新建项目</Link></div>
-            <div className="project-board">
-              {activeProjects.map((project) => <Link to="/app/tasks" className="project-board-row" key={project.id}><span className="project-board-mark" style={{ color: project.accent, background: `${project.accent}16` }}>{project.name.slice(0, 1)}</span><span className="project-row-copy"><strong>{project.name}</strong><small>{project.description}</small></span><span className="project-board-status"><i className={`project-status-dot status-${project.status}`} />{project.status === 'active' ? '进行中' : project.status === 'paused' ? '已暂停' : '已完成'}</span><span className="project-board-progress">{project.progress}%<small className="mini-progress"><i style={{ width: `${project.progress}%`, background: project.accent }} /></small></span><span className="project-arrow" aria-hidden="true">↗</span></Link>)}
-            </div>
-          </section>
+          <ProjectsPanel key={activeWorkspace.id}/>
 
           <section className="workspace-panel">
-            <div className="panel-header"><div><span className="section-kicker">RESOURCES</span><h3>目录与资源入口</h3></div><span className="muted-note">Workspace 范围</span></div>
+            <div className="panel-header"><div><span className="section-kicker">RESOURCES</span><h3>资料与成果入口</h3></div><span className="muted-note">按各页实际范围查看</span></div>
             <div className="resource-grid">{RESOURCE_LINKS.map((resource) => <Link to={resource.to} className="resource-tile" key={resource.name}><span className={`resource-icon resource-${resource.tone}`}>{resource.icon}</span><strong>{resource.name}</strong><small>{resource.detail}</small><span className="resource-arrow">↗</span></Link>)}</div>
           </section>
 

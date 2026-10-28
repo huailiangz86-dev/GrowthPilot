@@ -1,44 +1,44 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useWorkspace } from '../../workspace/useWorkspace';
 import type { OnboardingDraft, OnboardingSelection } from '../../workspace/workspaceData';
 import {
-  createOnboardingCompletionPayload,
   createOnboardingSelection,
   inferOnboardingDraft,
   type OnboardingPreview,
 } from './onboardingDraft';
+import { captureOwnerId, type CaptureSaveResult } from '../../workspace/captureSync';
+import { onboardingInputKey, onboardingRows, ONBOARDING_STATUS_LABELS, type OnboardingSubmission } from '../../workspace/onboardingSync';
 import './Onboarding.css';
 
 type Phase = 'write' | 'review' | 'saved';
 type SavedMode = 'workspace' | 'capture';
 
-const ONBOARDING_INPUT_DRAFT_KEY = 'gp_onboarding_input_draft';
-
+function inputKey() {return onboardingInputKey(captureOwnerId(localStorage.getItem('gp_token')));}
 function loadInputDraft() {
-  if (typeof window === 'undefined') return '';
-  return window.localStorage.getItem(ONBOARDING_INPUT_DRAFT_KEY) ?? '';
+  try {return localStorage.getItem(inputKey()) ?? '';} catch {return '';}
 }
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { applyOnboarding, skipOnboarding } = useWorkspace();
-  const [phase, setPhase] = useState<Phase>('write');
-  const [rawInput, setRawInput] = useState(loadInputDraft);
-  const [draft, setDraft] = useState<OnboardingDraft | null>(null);
-  const [selected, setSelected] = useState<OnboardingSelection>(() => createOnboardingSelection(3));
+  const { onboardingSubmission, applyOnboarding, retryOnboarding, addCapture, retryCapture, skipOnboarding } = useWorkspace();
+  const [phase, setPhase] = useState<Phase>(onboardingSubmission ? 'saved' : 'write');
+  const [rawInput, setRawInput] = useState(() => onboardingSubmission?.rawInput ?? loadInputDraft());
+  const [draft, setDraft] = useState<OnboardingDraft | null>(onboardingSubmission?.draft ?? null);
+  const [selected, setSelected] = useState<OnboardingSelection>(() => onboardingSubmission?.selected ?? createOnboardingSelection(3));
   const [savedMode, setSavedMode] = useState<SavedMode>('workspace');
   const [aiGenerated, setAiGenerated] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [captureSaved, setCaptureSaved] = useState<CaptureSaveResult | null>(null);
+  const savingRef = useRef(false);
+  const stepRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {if (phase !== 'write') stepRef.current?.focus({preventScroll:true});}, [phase]);
 
   useEffect(() => {
-    if (rawInput.trim()) {
-      window.localStorage.setItem(ONBOARDING_INPUT_DRAFT_KEY, rawInput);
-    } else {
-      window.localStorage.removeItem(ONBOARDING_INPUT_DRAFT_KEY);
-    }
+    if (!rawInput.trim()) return;
+    try {localStorage.setItem(inputKey(), rawInput);} catch {setError('浏览器无法保留原话草稿，请保留当前输入后重试。');}
   }, [rawInput]);
 
   const handlePreview = async () => {
@@ -65,36 +65,48 @@ export default function Onboarding() {
     }
   };
 
-  const syncConfirmedContext = async () => {
-    if (!draft || !selected.workspace || loading) return;
+  const handleComplete = async () => {
+    if (!draft || !selected.workspace || savingRef.current) return;
+    savingRef.current = true;
     setLoading(true);
     setError('');
     try {
-      await api.post('/onboarding/context/complete', {
-        ...createOnboardingCompletionPayload(draft, selected, rawInput),
-      });
-      window.localStorage.removeItem(ONBOARDING_INPUT_DRAFT_KEY);
-    } catch {
-      setError('本地工作台已建立，但云端同步未完成。原话已保存在本机，可稍后重试。');
-    } finally {
-      setLoading(false);
-    }
+      const attempt = applyOnboarding(draft, selected, rawInput);
+      setSavedMode('workspace');
+      setPhase('saved');
+      const result = await attempt;
+      setDraft(result.draft); setSelected(result.selected); setRawInput(result.rawInput);
+      if (result.saved) localStorage.removeItem(inputKey());
+    } catch (cause) {setError(cause instanceof Error ? cause.message : '保存未完成，原话仍在，请重试。');}
+    finally {setLoading(false); savingRef.current = false;}
   };
 
-  const handleComplete = () => {
-    if (!draft || !selected.workspace || loading) return;
-    applyOnboarding(draft, selected, rawInput);
-    setSavedMode('workspace');
-    setPhase('saved');
-    void syncConfirmedContext();
+  const handleRetry = async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setLoading(true); setError('');
+    try {
+      if (savedMode === 'capture' && captureSaved) {
+        const result = await retryCapture(captureSaved.captureId);
+        setCaptureSaved(result);
+        if (result.syncState === 'synced') localStorage.removeItem(inputKey());
+      } else {
+        const result = await retryOnboarding();
+        if (result.saved) localStorage.removeItem(inputKey());
+      }
+    } catch (cause) {setError(cause instanceof Error ? cause.message : '同步未完成，原话仍在。');}
+    finally {setLoading(false); savingRef.current = false;}
   };
 
-  const handleCaptureOnly = () => {
-    if (!draft || loading) return;
-    applyOnboarding(draft, selected, rawInput, true);
-    window.localStorage.removeItem(ONBOARDING_INPUT_DRAFT_KEY);
-    setSavedMode('capture');
-    setPhase('saved');
+  const handleCaptureOnly = async () => {
+    if (!draft || savingRef.current) return;
+    savingRef.current = true; setLoading(true); setError('');
+    try {
+      const result = await addCapture({content: rawInput, type: 'idea', status: 'noted'});
+      setCaptureSaved(result); setSavedMode('capture'); setPhase('saved');
+      if (result.syncState === 'synced') localStorage.removeItem(inputKey());
+    } catch (cause) {setError(cause instanceof Error ? cause.message : '原话尚未保存，请重试。');}
+    finally {setLoading(false); savingRef.current = false;}
   };
 
   const handleReject = () => {
@@ -104,14 +116,13 @@ export default function Onboarding() {
   };
 
   const handleSkip = () => {
-    window.localStorage.removeItem(ONBOARDING_INPUT_DRAFT_KEY);
     skipOnboarding();
     navigate('/app');
   };
 
   return (
     <main className="workspace-onboarding">
-      <div className="onboarding-inner">
+      <div className="onboarding-inner" ref={stepRef} tabIndex={-1} aria-label={phase === 'review' ? '审阅工作空间方案' : '工作空间保存结果'}>
         <header className="onboarding-top">
           <div className="onboarding-brand">
             <span className="brand-mark">GP</span>
@@ -153,7 +164,9 @@ export default function Onboarding() {
             loading={loading}
             error={error}
             onEnter={() => navigate('/app')}
-            onRetry={savedMode === 'workspace' && error ? () => { void syncConfirmedContext(); } : undefined}
+            submission={onboardingSubmission}
+            captureSaved={captureSaved}
+            onRetry={savedMode === 'workspace' && (!onboardingSubmission?.saved || error) || savedMode === 'capture' && captureSaved?.syncState !== 'synced' ? () => {void handleRetry();} : undefined}
           />
         )}
       </div>
@@ -250,7 +263,7 @@ function ReviewPhase({
           <ObjectCard
             type="PROJECT"
             title={draft.project.name}
-            detail={`下一步：${draft.project.nextAction}`}
+            detail={`${draft.project.description} · 下一步：${draft.project.nextAction}`}
             selected={selected.project}
             onToggle={() => setSelected((current) => ({ ...current, project: !current.project }))}
             disabled={!selected.workspace}
@@ -258,7 +271,7 @@ function ReviewPhase({
           <ObjectCard
             type="GOAL"
             title={draft.goal.title}
-            detail={draft.goal.horizon}
+            detail={`${draft.goal.horizon} · ${draft.goal.description}${selected.project ? ` · 项目：${draft.project.name}` : ''}`}
             selected={selected.goal}
             onToggle={toggleGoal}
             disabled={!selected.workspace}
@@ -266,7 +279,7 @@ function ReviewPhase({
           <ObjectCard
             type="GROWTH PLAN"
             title={draft.plan.title}
-            detail={`第 1 周 · ${draft.plan.totalWeeks} 周路线`}
+            detail={`${draft.plan.totalWeeks} 周 · ${draft.plan.description} · 目标：${draft.goal.title} · 里程碑：${draft.plan.milestones.join(' → ')}`}
             selected={selected.plan}
             onToggle={() => setSelected((current) => ({ ...current, plan: !current.plan }))}
             disabled={!selected.workspace || !selected.goal}
@@ -276,10 +289,10 @@ function ReviewPhase({
               <span className="object-type">TASKS / {draft.tasks.filter((_, index) => selected.tasks[index]).length}</span>
               {draft.tasks.map((task, index) => (
                 <ObjectCard
-                  key={task.title}
+                  key={index}
                   type="TASK"
                   title={task.title}
-                  detail={task.dueLabel}
+                  detail={`${task.dueLabel} · ${task.description}${selected.goal ? ` · 目标：${draft.goal.title}` : ''}${selected.plan && selected.goal ? ` · 计划：${draft.plan.title}` : ''}`}
                   selected={selected.tasks[index] ?? false}
                   onToggle={() => toggleTask(index)}
                   disabled={!selected.workspace}
@@ -292,7 +305,7 @@ function ReviewPhase({
               <ObjectCard
                 type="LEARNING"
                 title={draft.learning.title}
-                detail={draft.learning.durationLabel}
+                detail={`预计 ${draft.learning.durationLabel} · ${draft.learning.summary}${selected.goal ? ` · 目标：${draft.goal.title}` : ''}`}
                 selected={selected.learning}
                 onToggle={() => setSelected((current) => ({ ...current, learning: !current.learning }))}
                 disabled={!selected.workspace}
@@ -338,7 +351,7 @@ function ObjectCard({
   return (
     <div className={classes}>
       <span className="object-card-bar" />
-      <div className="object-card-copy"><span className="object-type">{type}</span><strong>{title}</strong><small>{detail}</small></div>
+      <div className="object-card-copy"><span className="object-type">{type}</span><strong>{title}</strong><details><summary>查看内容</summary><small>{detail}</small></details></div>
       <button
         type="button"
         className={selected ? 'object-toggle is-selected' : 'object-toggle'}
@@ -354,14 +367,7 @@ function ObjectCard({
 }
 
 function SavedPhase({
-  draft,
-  rawInput,
-  selected,
-  mode,
-  loading,
-  error,
-  onEnter,
-  onRetry,
+  draft, rawInput, mode, loading, error, onEnter, onRetry, submission, captureSaved,
 }: {
   draft: OnboardingDraft;
   rawInput: string;
@@ -371,42 +377,23 @@ function SavedPhase({
   error: string;
   onEnter: () => void;
   onRetry?: () => void;
+  submission: OnboardingSubmission | null;
+  captureSaved: CaptureSaveResult | null;
 }) {
-  if (mode === 'capture') {
-    return (
-      <section className="onboarding-content saved-onboarding">
-        <span className="saved-symbol">✓</span>
-        <span className="section-kicker">ORIGINAL INPUT SAVED</span>
-        <h2>原话已记录，方案没有写入</h2>
-        <p className="onboarding-lead">这次只保存为一条成长记录。你可以先进入工作台，之后再让 AI 把它整理成项目和行动。</p>
-        <blockquote className="onboarding-quote">“ {rawInput} ”</blockquote>
-        <button type="button" className="primary-action onboarding-primary" onClick={onEnter}>进入我的成长工作台 <span>→</span></button>
-      </section>
-    );
-  }
-
-  const taskCount = selected.tasks.filter(Boolean).length;
-  const summary = [
-    { label: '工作空间', value: draft.workspace.name, show: selected.workspace },
-    { label: '当前项目', value: draft.project.name, show: selected.project },
-    { label: '目标', value: draft.goal.title, show: selected.goal },
-    { label: '本周计划', value: draft.plan.title, show: selected.plan },
-    { label: '任务', value: `${taskCount} 个已加入`, show: taskCount > 0 },
-    { label: '学习入口', value: draft.learning.title, show: selected.learning },
-  ].filter((item) => item.show);
-
-  return (
-    <section className="onboarding-content saved-onboarding">
-      <span className="saved-symbol">✓</span>
-      <span className="section-kicker">YOUR WORKSPACE IS READY</span>
-      <h2>第一条行动链已经建立</h2>
-      <p className="onboarding-lead">「{draft.workspace.name}」已经准备好。首页会读取刚刚确认的项目、计划、任务和学习入口。</p>
-      <div className="saved-object-summary">
-        {summary.map((item) => <div key={item.label}><span>{item.label}</span><strong>{item.value}</strong></div>)}
-      </div>
-      {error && <p className="onboarding-error" role="status">{error}</p>}
-      {onRetry && <button type="button" className="secondary-action" onClick={onRetry} disabled={loading}>{loading ? '正在重试同步...' : '重试云端同步'}</button>}
-      <button type="button" className="primary-action onboarding-primary" onClick={onEnter}>进入我的成长工作台 <span>→</span></button>
-    </section>
-  );
+  const synced = mode === 'capture' ? captureSaved?.syncState === 'synced' : submission?.saved === true;
+  const rows = submission ? onboardingRows(submission) : [];
+  const savedCount = rows.filter(row => row.status === 'synced').length;
+  return <section className="onboarding-content saved-onboarding">
+    <span className="saved-symbol">{synced ? '✓' : '↗'}</span>
+    <span className="section-kicker">{synced ? 'YOUR WORKSPACE IS READY' : 'YOUR ORIGINAL WORDS ARE KEPT'}</span>
+    <h2>{mode === 'capture' ? synced ? '原话已同步' : '原话已保留' : synced ? '第一条行动链已完整保存' : loading ? '正在逐项保存你的方案' : '方案已保留，继续完成保存'}</h2>
+    <p className="onboarding-lead">{mode === 'capture' ? '这次只保存原话，没有创建方案中的工作对象。' : synced ? `「${draft.workspace.name}」的项目、计划、任务和学习入口可在工作台继续查看。` : `已保存 ${savedCount} / ${rows.length} 项。原话和确认方案保留在本机；刷新可恢复，重试只处理未完成项。`}</p>
+    <blockquote className="onboarding-quote">“ {rawInput} ”</blockquote>
+    {mode === 'workspace' && <div className="onboarding-save-list" aria-live="polite">{rows.map(row => <article key={row.key} className="onboarding-save-row">
+      <div><span className="object-type">{row.label}</span><strong>{row.title}</strong><details><summary>查看内容与关联</summary><p>{row.detail}</p>{row.key !== 'workspace' && <p>归属：{draft.workspace.name}{row.key === 'plan' ? ` · 目标：${draft.goal.title}` : ''}</p>}</details>{row.error && <p className="onboarding-row-error">{row.error}</p>}</div>
+      <span className={`onboarding-save-status ${row.status}`}>{ONBOARDING_STATUS_LABELS[row.status]}</span>
+    </article>)}</div>}
+    {(error || submission?.error && mode === 'workspace' || captureSaved?.error && mode === 'capture') && <p className="onboarding-error" role="alert">{error || (mode === 'workspace' ? submission?.error : captureSaved?.error)}</p>}
+    <div className="review-actions">{onRetry && <button type="button" className="secondary-action" onClick={onRetry} disabled={loading}>{loading ? '正在保存…' : '重试未完成项'}</button>}<button type="button" className="primary-action" onClick={onEnter} disabled={loading}>{synced ? '进入我的成长工作台' : '先查看工作台'} <span>→</span></button></div>
+  </section>;
 }

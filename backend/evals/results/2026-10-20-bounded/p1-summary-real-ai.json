@@ -1,0 +1,55 @@
+{
+  "request_id": "25397e61-7150-4a51-8dbe-b1739f1349de",
+  "status": "completed",
+  "error": null,
+  "question": "保留实际观察和研究限制",
+  "source": [
+    {
+      "end": 42,
+      "key": "S1",
+      "page": null,
+      "text": "虚构试用记录：16 人体验，其中 4 人自报查找更快。未记录实际耗时，也没有比较组。",
+      "start": 0,
+      "title": "虚构 · 正式摘要验证",
+      "version": 1,
+      "category": "note",
+      "checksum": "8cc6cffe627e5bfccfb455e974982ed56c9500a1a7f0eadd329892193cb47a21",
+      "chunk_id": "c1",
+      "source_id": "412b99ee-11a9-4c6c-955b-44abc2875a01",
+      "source_url": null,
+      "parser_version": "personal-source-1",
+      "source_version_id": "4a7d39c8-a84a-57f5-b399-289acb3f3927"
+    }
+  ],
+  "result": {
+    "title": "选定资料的原文要点",
+    "points": [
+      {
+        "kind": "observation",
+        "text": "原文摘录（S1）：“虚构试用记录：16 人体验，其中 4 人自报查找更快。”\n原文摘录（S1）：“未记录实际耗时，也没有比较组。”",
+        "evidence": [
+          {
+            "end": 27,
+            "key": "S1",
+            "quote": "虚构试用记录：16 人体验，其中 4 人自报查找更快。",
+            "start": 0
+          },
+          {
+            "end": 42,
+            "key": "S1",
+            "quote": "未记录实际耗时，也没有比较组。",
+            "start": 27
+          }
+        ]
+      }
+    ],
+    "limitations": "这是选定资料的摘录式整理，保留原作者表述；未独立验证来源真伪，不新增因果解释、能力判断或有效版本裁决。"
+  },
+  "saved": {
+    "notes": "本人补充：不能据此判断效率提升。",
+    "title": "虚构 · 有出处的观察摘录"
+  },
+  "saved_at": "2026-10-20T07:43:41.081467+00:00",
+  "created_at": "2026-10-20T07:43:40.078925+00:00",
+  "prompt_version": "v2"
+}

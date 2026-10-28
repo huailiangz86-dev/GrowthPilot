@@ -93,6 +93,8 @@ class CapabilityBriefResponse(BaseModel):
     fact_actions: dict[str, CapabilityBriefFactActionResponse] = Field(default_factory=dict)
     fact_goal_actions: dict[str, "CapabilityBriefFactGoalActionResponse"] = Field(default_factory=dict)
     fact_plan_actions: dict[str, "CapabilityBriefFactPlanActionResponse"] = Field(default_factory=dict)
+    fact_knowledge_actions: dict[str, dict[str, str]] = Field(default_factory=dict)
+    fact_memory_actions: dict[str, dict[str, str]] = Field(default_factory=dict)
 
 
 class CapabilityBriefTaskCreateRequest(BaseModel):

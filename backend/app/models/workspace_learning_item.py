@@ -20,6 +20,7 @@ class WorkspaceLearningItem(Base):
     goal_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(240), nullable=False)
     summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    source_url: Mapped[str | None] = mapped_column(String(2000), nullable=True)
     kind: Mapped[str] = mapped_column(String(16), nullable=False, default="note")
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="queued")
     progress: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

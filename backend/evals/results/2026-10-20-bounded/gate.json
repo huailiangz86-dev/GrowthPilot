@@ -1,0 +1,264 @@
+{
+  "status": "passed_for_bounded_scope",
+  "reviewer": "Codex assistant; not independent expert certification",
+  "scope": "single-question evidence comparison and attributed verbatim extracts; no free causal or ability diagnosis",
+  "cases": 40,
+  "real_model_cases_in_final_set": 35,
+  "structural_prechecks_in_final_set": 5,
+  "campaign_requests": 142,
+  "initial_holdout_passes": 7,
+  "initial_holdout_total": 8,
+  "holdout_recheck_passes": 8,
+  "holdout_after_fix_is_regression": true,
+  "critical_issues_observed": 0,
+  "renderer_sha256": "66ff6da21fbca0b9efaead69ebc83dde373fa162376e18364ff14f56076e8980",
+  "semantic_review": [
+    {
+      "id": "cache-contradiction",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "mail-omission",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "correct-low-rating",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "empty-answer",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "minutes-only",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "wrong-personal-note",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "conflicting-sources",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "source-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "source-only",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "unavailable-history",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-equivalent-archive",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-correct-unsure",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-library-omission",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-import-contradiction",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-note-no-standard",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-conflict-reversed",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-context-not-conflict",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-empty-answer",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-history-unavailable",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "new-injection-self-report",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "summary-observation",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "summary-inference",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "summary-conflict",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "summary-personal-note",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "summary-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "summary-missing-evidence",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-full-process",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-numbers",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-conflict-order",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-feeling",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "new-summary-unrelated",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "holdout-equivalent-low-confidence",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "holdout-conflict-no-preference",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "holdout-personal-confusion",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "holdout-missing-weeks",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "对照预先分类条件复核本题引用；正确改写不因低自评判错，冲突不预设有效版本，未生成能力或心理归因。"
+    },
+    {
+      "id": "holdout-summary-process",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "holdout-summary-observation",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "holdout-summary-contexts",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    },
+    {
+      "id": "holdout-summary-directive",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对流程、数字、限制、作者归属和原文引用，疑似指令排除范围明确披露。"
+    }
+  ],
+  "reports": [
+    "p0-final-regression.json",
+    "p0r4c-summary-quality-2026-10-20.json",
+    "p0-final-holdout.json"
+  ],
+  "summary_recheck": "summary-final-render-recheck.json",
+  "final_history_precheck_fix": "Do not treat generic 一次实际尝试 as a request for missing history; regression and holdout rerun with final renderer."
+}

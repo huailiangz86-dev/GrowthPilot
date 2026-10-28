@@ -1,0 +1,27 @@
+id: source-grounded-learning
+version: '1.0.0'
+name: 引导提问、提取练习与标准反馈
+reviewed_on: '2026-10-09'
+origin: GrowthPilot 自有实现；公开方法摘要
+sources:
+  - id: ies-study-guide
+    title: IES 学习与教学实践指南
+    url: https://ies.ed.gov/ncee/wwc/PracticeGuide/1
+    role: 学习方法依据
+    summary: 指南支持提取测验、深层解释问题及分散学习；这些是方法依据，不能证明个人掌握。
+  - id: khanmigo-tutor
+    title: Khanmigo 官方教学助手说明
+    url: https://khanmigo.ai/
+    role: 竞品能力参考；未接入其内容库或模型
+    summary: 通过引导帮助学习者发现答案，并提供评价标准工具。
+procedure:
+  - guided_explanation：围绕本次疑问拆解材料，给一至三个引导问题；只解释摘录支持的内容。
+  - retrieval_practice：给一道可由摘录作答的提取练习，一至四个可观察的检查项，以及恰好三级提示。
+  - criterion_feedback：逐一使用已保存练习的检查项核对实际答案；每项给原文依据及答案中的逐字证据或明确缺失。
+  - 原文未支持、题目超出摘录或答案无法判断时使用 uncertain；不强行判错。
+  - 检查项需在本人采用练习后保存；后续反馈必须沿用这些检查项，不能临时改动标准。
+limits:
+  - 不读取未抓取的链接，不用本人答案作为原文，不把学习分钟当掌握程度。
+  - 引用校验与检查项一致性是可执行约束；反馈语义正确性仍需用户或专业评估核对。
+  - 三级提示由模型生成，提示是否透露过多仍需教学质量评估。
+  - 间隔复习和 FSRS 调度暂未接入；需要独立的真实复习尝试及本人评级记录。

@@ -160,6 +160,8 @@ export default function Mine() {
           <div className="panel-header">
             <div><span className="section-kicker">PERSONAL DATA</span><h3>数据与历史工具</h3></div>
           </div>
+          <Link to="/app/knowledge"><span>▤</span><div><strong>我的知识库</strong><small>学习记录、个人资料与有出处的总结</small></div><b>→</b></Link>
+          <Link to="/app/fitness"><span>↗</span><div><strong>个人健身档案</strong><small>活动记录、习惯节奏与读取范围</small></div><b>→</b></Link>
           <Link to="/app/memory"><span>◍</span><div><strong>Memory 与长期上下文</strong><small>查看系统记住了什么</small></div><b>→</b></Link>
           <Link to="/app/knowledge-base"><span>▤</span><div><strong>旧知识库入口</strong><small>已保留的历史知识功能</small></div><b>→</b></Link>
           <Link to="/app/records"><span>↳</span><div><strong>历史交易工具</strong><small>记录、复盘、持仓和行情</small></div><b>→</b></Link>
@@ -202,17 +204,17 @@ export default function Mine() {
           <div><span className="section-kicker">AGENT DATA SCOPE</span><h3>Agent 可以参考哪些数据</h3></div>
           <span className="muted-note">默认全部开启</span>
         </div>
-        <p className="mine-note">这是新 Personal Agent 的读取范围。关闭来源只影响之后的新请求，已经生成的回复和引用不会被改写。旧交易教练仍是历史工具，不属于这份新范围。</p>
+        <p className="mine-note">个人 Agent 只读取当前工作台允许的数据。关闭来源后，新请求会排除对应数据；依赖这些来源的历史回复和建议会隐藏，引用会显示不可用。已经由你确认保存的行动仍可管理。</p>
         <form onSubmit={savePrivacyScope}>
           <div className="privacy-scope-options">
             {([
-              ['tasks', '任务', '当前 Workspace 的任务状态和下一步。'],
+              ['tasks', '任务', '当前 Workspace 的任务状态、下一步和行动完成结果。'],
               ['goals', '目标', '当前 Workspace 的目标与进度。'],
               ['plans', '计划', '当前 Workspace 的周期计划。'],
-              ['learning', '学习', '当前 Workspace 的学习入口与进度。'],
+              ['learning', '学习', '当前 Workspace 的学习入口、进度与实际投入分钟。'],
               ['knowledge_cards', '知识卡', '已保存且确认过的知识卡内容。'],
               ['reflections', '晨晚复盘与快速记录', 'Morning、Micro Capture 和 Evening。'],
-              ['memories', '长期 Memory', '长期保存的个人事实和记忆。'],
+              ['memories', '工作台来源记忆', '有当前工作台来源的首次原话与领域记忆；原始来源也需开启。'],
             ] as const).map(([key, label, description]) => (
               <label className="privacy-scope-option" key={key}>
                 <input type="checkbox" checked={selectedPrivacySources.includes(key)} onChange={() => togglePrivacySource(key)} />

@@ -20,6 +20,7 @@ export type KnowledgeCardAiStatus = 'not_requested' | 'preview_ready' | 'confirm
 
 export interface Workspace {
   id: string;
+  ownerId?: string | null;
   name: string;
   description: string;
   color: string;
@@ -63,6 +64,7 @@ export interface GrowthPlan {
   milestones: string[];
   projectId?: string;
   periodType?: 'weekly' | 'monthly' | 'quarterly';
+  executionEnabled?: boolean;
 }
 
 export interface Task {
@@ -80,6 +82,7 @@ export interface Task {
   goalId?: string;
   planId?: string;
   source: 'ai' | 'user' | 'capture';
+  agentSource?: {conversationId: string; turnId: string};
   recommendedReason?: string;
   completedDate?: string;
 }
@@ -107,6 +110,7 @@ export interface LearningItem {
   durationMinutes?: number;
   summary: string;
   progressUpdatedDate?: string;
+  sourceUrl?: string;
 }
 
 export interface KnowledgeCard {
@@ -161,6 +165,7 @@ export interface Activity {
 
 export interface Reflection {
   id: string;
+  clientRequestId?: string;
   workspaceId: string;
   type: ReflectionType;
   reflectionDate: string;
@@ -184,6 +189,10 @@ export interface Reflection {
 
 export interface Capture {
   id: string;
+  clientRequestId?: string;
+  ownerId?: string;
+  syncState?: import('./captureSync.ts').CaptureSyncState;
+  syncError?: string;
   workspaceId: string;
   type: CaptureType;
   status: CaptureStatus;
@@ -197,6 +206,7 @@ export interface Capture {
 
 export interface CaptureInput {
   content: string;
+  clientRequestId?: string;
   type?: CaptureType;
   status?: CaptureStatus;
   projectId?: string;
@@ -707,6 +717,10 @@ function normalizeCaptures(captures: unknown, workspaceId: string): Capture[] {
       goalId: item.goalId,
       taskId: item.taskId,
       createdLabel: item.createdLabel ?? '此前记录',
+      clientRequestId: item.clientRequestId,
+      ownerId: item.ownerId,
+      syncState: item.syncState === 'syncing' ? 'pending' : item.syncState,
+      syncError: item.syncError,
     });
     return normalized;
   }, []);

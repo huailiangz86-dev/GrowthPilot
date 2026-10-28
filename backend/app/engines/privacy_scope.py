@@ -24,10 +24,10 @@ PRIVACY_SOURCE_LABELS: Final[dict[str, str]] = {
 }
 
 PRIVACY_SOURCE_DESCRIPTIONS: Final[dict[str, str]] = {
-    "tasks": "允许 Agent 参考当前 Workspace 的任务状态和下一步。",
+    "tasks": "允许 Agent 参考当前 Workspace 的任务状态、下一步和行动完成结果。",
     "goals": "允许 Agent 参考当前 Workspace 的目标与进度。",
     "plans": "允许 Agent 参考当前 Workspace 的周期计划。",
-    "learning": "允许 Agent 参考当前 Workspace 的学习入口与进度。",
+    "learning": "允许 Agent 参考当前 Workspace 的学习入口、进度与显式实际投入分钟。",
     "knowledge_cards": "允许 Agent 参考已保存的知识卡及其确认内容。",
     "reflections": "允许 Agent 参考 Morning、Micro Capture 和 Evening。",
     "memories": "允许 Agent 参考长期保存的个人事实和记忆。",

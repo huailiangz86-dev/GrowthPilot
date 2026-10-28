@@ -1,0 +1,12 @@
+import {useState} from 'react';
+import '../personal/personal.css';
+import '../learning/learning.css';
+
+const CHUNKS=[{id:'example-chunk-1',title:'回忆方法 · 第一步',text:'先合上资料，从记忆中独立写出问题的答案。'},{id:'example-chunk-2',title:'回忆方法 · 核对',text:'打开原文，对照独立答案，记录一致之处与遗漏。'}];
+export default function BailianKnowledgePrototype(){
+  const [query,setQuery]=useState(()=>{try{return sessionStorage.getItem('gp-bailian-prototype-query')||'怎样核对自己的学习答案？';}catch{return '';}}),[phase,setPhase]=useState('empty'),[fail,setFail]=useState(false),[selected,setSelected]=useState(false);
+  async function run(){setPhase('loading');await new Promise(r=>setTimeout(r,300));setPhase(fail?'failed':query.trim()?'success':'no-results');}
+  return <main className="lw-prototype"><a href="/prototype">← 原型入口</a><header className="lw-intro"><div><span>D12 · 百炼知识库连接 · 独立模拟</span><h1>核对云端切片与检索</h1><p>此页使用虚构资料和预设结果，不访问百炼或本人记录。</p></div></header><section className="lw-sheet"><h2>已选测试连接 · 模拟</h2><p>KnowledgeHub 配置 → 百炼文档搜索知识库</p><p>完整原资料与百炼切片分别保留；切片按来源核对。</p><button className="pp-secondary" onClick={()=>setSelected(true)}>读取测试文档 · 模拟</button>{selected&&<><h3>回忆方法笔记 · 虚构文档</h3><p>已完成索引 · 2 个示例切片</p><details><summary>查看切片与来源 · 模拟</summary>{CHUNKS.map(c=><article className="lw-match" key={c.id}><h4>{c.title}</h4><p>{c.text}</p><small>文档 example-document · 切片 {c.id}</small></article>)}</details></>}
+  <form className="lw-search" onSubmit={e=>{e.preventDefault();void run();}}><input aria-label="百炼原型测试问题" maxLength={500} value={query} onChange={e=>{setQuery(e.target.value);try{sessionStorage.setItem('gp-bailian-prototype-query',e.target.value);}catch{setPhase('storage-failed');}}}/><button className="pp-primary" disabled={phase==='loading'}>{phase==='loading'?'正在检索 · 模拟…':'在百炼中测试检索 · 模拟'}</button></form><label><input type="checkbox" checked={fail} onChange={e=>setFail(e.target.checked)}/>模拟百炼失败</label>
+  {phase==='empty'&&<p>输入一个问题，核对能找到哪些资料片段。</p>}{phase==='loading'&&<p role="status">正在读取检索结果 · 模拟…</p>}{phase==='failed'&&<p role="alert">连接失败 · 模拟，问题保留。<button onClick={()=>void run()}>重试检索</button></p>}{phase==='storage-failed'&&<p role="alert">问题暂时无法保留，输入仍在页面。</p>}{phase==='no-results'&&<p>没有匹配切片 · 模拟。</p>}{phase==='success'&&<section aria-label="百炼模拟检索结果"><p>找到 2 个预设片段 · 模拟，不代表真实检索质量。</p>{CHUNKS.map(c=><article className="lw-match" key={c.id}><h3>{c.title}</h3><p>{c.text}</p><details><summary>核对文档与切片出处</summary><p>回忆方法笔记 · example-document · {c.id} · 独立示例</p></details></article>)}</section>}</section></main>;
+}

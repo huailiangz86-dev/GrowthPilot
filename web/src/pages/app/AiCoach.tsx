@@ -108,7 +108,7 @@ export default function AiCoach() {
       }>('/ai-coach/chat', {
         message: text.trim(),
         theme: theme || activeTheme,
-        conversation_history: messages.map((m) => ({ role: m.role, content: m.content })),
+        history: messages.map((m) => ({ role: m.role, content: m.content })),
       });
 
       const replyText = res.reply || '抱歉，AI 教练暂时无法回复，请稍后再试。';

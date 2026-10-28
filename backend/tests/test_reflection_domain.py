@@ -17,6 +17,12 @@ class _FakeSession:
     def add(self, item: object) -> None:
         self.items.append(item)
 
+    async def execute(self, _query):
+        class Result:
+            def scalar_one_or_none(self):
+                return None
+        return Result()
+
 
 def test_reflection_request_requires_type_specific_facts() -> None:
     try:

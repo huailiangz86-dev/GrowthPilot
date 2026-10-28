@@ -1,7 +1,8 @@
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { loginDestination } from '../learning/knowledgeNavigation';
 
 type LoginTab = 'phone' | 'wechat';
 
@@ -13,6 +14,8 @@ interface AuthResult {
 
 export default function Login() {
   const navigate = useNavigate();
+  const nextPage = new URLSearchParams(location.search).get('next');
+  const afterLogin = loginDestination(nextPage);
   const [tab, setTab] = useState<LoginTab>('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
@@ -20,29 +23,69 @@ export default function Login() {
   const [countdown, setCountdown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [wxQrUrl, setWxQrUrl] = useState('');
-  const [_wxState, setWxState] = useState('');
   const [wxPolling, setWxPolling] = useState(false);
 
+  const [authOptions, setAuthOptions] = useState<{development_login: boolean; phone_login: boolean; wechat_web_login: boolean} | null>(null);
+  const [sendingCode, setSendingCode] = useState(false);
+  const sendingRef = useRef(false);
+  const smsTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const qrSequence = useRef(0);
+  const localDevelopment = import.meta.env.DEV && ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
+
+  const stopPolling = () => {
+    qrSequence.current++;
+    if (pollTimer.current) clearInterval(pollTimer.current);
+    if (pollTimeout.current) clearTimeout(pollTimeout.current);
+    setWxPolling(false);
+  };
+  useEffect(() => {
+    let active = true;
+    const sequence = qrSequence;
+    void api.get<NonNullable<typeof authOptions>>('/auth/options').then(value => {if (active) setAuthOptions(value);}).catch(() => {});
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('token')) {
+      params.delete('token');
+      window.history.replaceState({}, '', `/login${params.size ? `?${params}` : ''}`);
+      setError('旧的登录回执已失效，请重新发起扫码登录。');
+    } else if (params.get('wx') === 'confirmed') {
+      setNotice('微信已确认，请回到发起扫码的页面继续。');
+    } else if (params.has('error')) {
+      setError('本次微信登录未完成，请重新加载二维码。');
+    }
+    return () => {
+      active = false; sequence.current++;
+      if (smsTimer.current) clearInterval(smsTimer.current);
+      if (pollTimer.current) clearInterval(pollTimer.current);
+      if (pollTimeout.current) clearTimeout(pollTimeout.current);
+    };
+  }, []);
+
   const handleSendCode = async () => {
+    if (sendingRef.current || countdown > 0) return;
     if (!phone.match(/^1[3-9]\d{9}$/)) {
       setError('请输入正确的手机号');
       return;
     }
+    sendingRef.current = true; setSendingCode(true);
     setError('');
     try {
       await api.post('/auth/sms/send-code', { phone });
       setCodeSent(true);
       setCountdown(60);
-      const timer = setInterval(() => {
+      if (smsTimer.current) clearInterval(smsTimer.current);
+      smsTimer.current = setInterval(() => {
         setCountdown((prev) => {
-          if (prev <= 1) { clearInterval(timer); return 0; }
+          if (prev <= 1) { if (smsTimer.current) clearInterval(smsTimer.current); return 0; }
           return prev - 1;
         });
       }, 1000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '发送失败');
-    }
+    } finally {sendingRef.current = false; setSendingCode(false);}
   };
 
   const handlePhoneLogin = async () => {
@@ -61,7 +104,7 @@ export default function Login() {
       const token = res.access_token;
       if (token) {
         localStorage.setItem('gp_token', token);
-        navigate('/app');
+        navigate(afterLogin);
       } else {
         setError('登录失败，请重试');
       }
@@ -74,14 +117,17 @@ export default function Login() {
   };
 
   const handleDevLogin = async () => {
+    if (!localDevelopment || !authOptions?.development_login) {setError('当前环境未开启开发登录'); return;}
     setLoading(true);
     setError('');
     try {
-      const res = await api.post<AuthResult>('/auth/wx-login', { code: 'dev_auto_login' });
+      const trial = new URLSearchParams(location.search).get('trial');
+      const isolatedTrial = import.meta.env.DEV && ['127.0.0.1', 'localhost'].includes(location.hostname) && ['c1', 'd1', 'd2', 'd3'].includes(trial || '');
+      const res = await api.post<AuthResult>('/auth/dev-login', { code: isolatedTrial ? `dev_${trial}_acceptance` : 'dev_auto_login' });
       const token = res.access_token;
       if (token) {
         localStorage.setItem('gp_token', token);
-        navigate('/app');
+        navigate(afterLogin);
       } else {
         setError('登录失败，请重试');
       }
@@ -93,54 +139,45 @@ export default function Login() {
     }
   };
 
-  // Load WX QR when switching to wechat tab
   const loadWxQr = async () => {
+    stopPolling();
+    const sequence = qrSequence.current;
+    setWxQrUrl(''); setError('');
     try {
-      const res = await api.get<{ qr_url: string; state: string }>('/auth/wx-web/qr-url');
-      if (res.qr_url) {
-        setWxQrUrl(res.qr_url);
-        setWxState(res.state);
-        startPolling(res.state);
-      } else {
-        setError('微信登录未配置，请使用手机号或开发者登录');
-      }
-    } catch {
-      setError('获取二维码失败');
+      const res = await api.get<{qr_url: string; state: string}>('/auth/wx-web/qr-url');
+      if (sequence !== qrSequence.current) return;
+      if (!res.qr_url || !res.state) {setError('微信登录未配置，请使用其他登录方式'); return;}
+      setWxQrUrl(res.qr_url);
+      startPolling(res.state, sequence);
+    } catch (error) {
+      if (sequence === qrSequence.current) setError(error instanceof Error ? error.message : '获取二维码失败');
     }
   };
 
-  const startPolling = (st: string) => {
+  const startPolling = (state: string, sequence: number) => {
     setWxPolling(true);
-    const timer = setInterval(async () => {
+    let reading = false;
+    pollTimer.current = setInterval(async () => {
+      if (reading || sequence !== qrSequence.current) return;
+      reading = true;
       try {
-        const res = await api.get<{ status: string; token?: string }>(`/auth/wx-web/poll?state=${st}`);
+        const res = await api.get<{status: string; token?: string}>('/auth/wx-web/poll', {state});
+        if (sequence !== qrSequence.current) return;
         if (res.status === 'ok' && res.token) {
-          clearInterval(timer);
-          setWxPolling(false);
+          stopPolling();
           localStorage.setItem('gp_token', res.token);
-          navigate('/app');
+          navigate(afterLogin);
         } else if (res.status === 'expired') {
-          clearInterval(timer);
-          setWxPolling(false);
-          setError('二维码已过期，请刷新');
+          stopPolling(); setError('二维码已过期，请刷新');
         }
-      } catch {
-        clearInterval(timer);
-        setWxPolling(false);
-      }
+      } catch (error) {
+        if (sequence === qrSequence.current) {stopPolling(); setError(error instanceof Error ? error.message : '登录状态读取失败，请刷新二维码');}
+      } finally {reading = false;}
     }, 2000);
-    // Stop after 5 minutes
-    setTimeout(() => { clearInterval(timer); setWxPolling(false); }, 300000);
+    pollTimeout.current = setTimeout(() => {
+      if (sequence === qrSequence.current) {stopPolling(); setError('二维码已过期，请刷新');}
+    }, 300000);
   };
-
-  // Check URL params for callback token
-  const urlParams = new URLSearchParams(window.location.search);
-  const callbackToken = urlParams.get('token');
-  if (callbackToken && !localStorage.getItem('gp_token')) {
-    localStorage.setItem('gp_token', callbackToken);
-    window.history.replaceState({}, '', '/login');
-    navigate('/app');
-  }
 
   return (
     <div style={pageStyle}>
@@ -162,7 +199,7 @@ export default function Login() {
             <button
               type="button"
               style={tab === 'phone' ? activeTabStyle : tabBtnStyle}
-              onClick={() => { setTab('phone'); setError(''); }}
+              onClick={() => { stopPolling(); setTab('phone'); setError(''); }}
             >
               手机号登录
             </button>
@@ -177,9 +214,11 @@ export default function Login() {
 
           {/* Error */}
           {error && (
-            <div style={errorStyle}>{error}</div>
+            <div role="alert" style={errorStyle}>{error}</div>
           )}
+          {notice && <p role="status" style={qrHintStyle}>{notice}</p>}
 
+          {tab === 'phone' && authOptions?.phone_login === false && <p role="status" style={qrHintStyle}>短信登录尚未配置，请使用其他登录方式。</p>}
           {/* Phone tab */}
           {tab === 'phone' && (
             <div style={formStyle}>
@@ -202,7 +241,7 @@ export default function Login() {
                     placeholder="请输入验证码"
                     value={code}
                     onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-                    style={{ ...inputStyle, flex: 1 }}
+                    style={{ ...inputStyle, flex: 1, minWidth: 0 }}
                     maxLength={6}
                   />
                   <button
@@ -213,9 +252,9 @@ export default function Login() {
                       cursor: countdown > 0 ? 'default' : 'pointer',
                     }}
                     onClick={handleSendCode}
-                    disabled={countdown > 0}
+                    disabled={sendingCode || countdown > 0 || authOptions?.phone_login === false}
                   >
-                    {countdown > 0 ? `${countdown}s` : codeSent ? '重新发送' : '获取验证码'}
+                    {sendingCode ? '发送中…' : countdown > 0 ? `${countdown}s` : codeSent ? '重新发送' : '获取验证码'}
                   </button>
                 </div>
               </div>
@@ -275,6 +314,7 @@ export default function Login() {
             </div>
           )}
 
+          {localDevelopment && authOptions?.development_login && <>
           {/* Divider */}
           <div style={dividerStyle}>
             <span style={dividerLineStyle} />
@@ -294,6 +334,7 @@ export default function Login() {
           >
             {loading ? '登录中...' : '开发者登录 (Dev Mode)'}
           </button>
+          </>}
         </div>
 
         <p style={footerTextStyle}>

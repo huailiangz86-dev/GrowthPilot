@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 backend/.venv/
 backend/.env
+backend/.local-trial/
 miniapp/.env*
 miniapp/node_modules/
 miniapp/dist/

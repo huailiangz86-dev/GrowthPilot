@@ -1,0 +1,257 @@
+{
+  "status": "passed_for_bounded_scope",
+  "reviewer": "Codex assistant; not independent expert certification",
+  "scope": "single-question evidence comparison and attributed verbatim extracts; no free causal or ability diagnosis",
+  "cases": 40,
+  "real_model_cases_in_final_set": 35,
+  "structural_prechecks_in_final_set": 5,
+  "campaign_requests": 119,
+  "initial_holdout_passes": 7,
+  "initial_holdout_total": 8,
+  "holdout_recheck_passes": 8,
+  "holdout_after_fix_is_regression": true,
+  "critical_issues_observed": 0,
+  "renderer_sha256": "eed14c920c543c94598841900472a37c87ebdd05f7b5e911809a01676c8cdaa5",
+  "semantic_review": [
+    {
+      "id": "cache-contradiction",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "mail-omission",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "correct-low-rating",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "empty-answer",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "minutes-only",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "wrong-personal-note",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "conflicting-sources",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "source-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "source-only",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "unavailable-history",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-equivalent-archive",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-correct-unsure",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-library-omission",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-import-contradiction",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-note-no-standard",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-conflict-reversed",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-context-not-conflict",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-empty-answer",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-history-unavailable",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "new-injection-self-report",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "summary-observation",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "summary-inference",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "summary-conflict",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "summary-personal-note",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "summary-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "summary-missing-evidence",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-full-process",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-numbers",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-conflict-order",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-feeling",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-injection",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "new-summary-unrelated",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "holdout-equivalent-low-confidence",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "holdout-conflict-no-preference",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "holdout-personal-confusion",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "holdout-missing-weeks",
+      "origin": "structural_precheck_no_model",
+      "pass": true,
+      "reason": "本题分类符合预先条件；解释和下一步按范围受限模板生成，不增加能力归因或预设有效版本。"
+    },
+    {
+      "id": "holdout-summary-process",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "holdout-summary-observation",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "holdout-summary-contexts",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    },
+    {
+      "id": "holdout-summary-directive",
+      "origin": "real_model",
+      "pass": true,
+      "reason": "逐段核对原文摘录、流程/数字/限制完整性与引用身份；未引入额外解释，疑似指令排除并披露范围。"
+    }
+  ]
+}

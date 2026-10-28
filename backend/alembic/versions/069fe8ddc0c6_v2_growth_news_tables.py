@@ -68,8 +68,9 @@ def upgrade() -> None:
     sa.Column('fetched_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.drop_index(op.f('idx_records_tags_gin'), table_name='records', postgresql_using='gin')
-    op.drop_index(op.f('idx_records_user_scene'), table_name='records')
+    # These indexes existed in some manual v1 databases, but not in the initial migration.
+    op.execute('DROP INDEX IF EXISTS idx_records_tags_gin')
+    op.execute('DROP INDEX IF EXISTS idx_records_user_scene')
     op.add_column('users', sa.Column('watchlist', postgresql.JSONB(astext_type=sa.Text()), server_default='[]', nullable=True))
     # ### end Alembic commands ###
 

@@ -461,6 +461,8 @@ def test_weekly_brief_fact_creates_one_traceable_goal_without_affecting_task_map
 
 
 def test_capability_run_response_normalizes_legacy_brief_action_maps() -> None:
+    from datetime import UTC, datetime
+
     user_id = uuid.uuid4()
     workspace_id = uuid.uuid4()
     capability = CapabilityRegistry(
@@ -496,6 +498,7 @@ def test_capability_run_response_normalizes_legacy_brief_action_maps() -> None:
         workspace_id=workspace_id,
         project_id=None,
         agent_run_id=agent_run.id,
+        started_at=datetime.now(UTC),
         input_summary="整理本周事实",
         permission_snapshot=["读取当前 Workspace 事实"],
         access_scope="当前 Workspace",

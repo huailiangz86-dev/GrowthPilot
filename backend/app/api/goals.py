@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.dependencies import get_current_user_id
 from app.core.exceptions import NotFoundException, ValidationException
+from app.engines.mutation_receipts import prepare_mutation, record_mutation
 from app.engines.workspace_engine import append_event, get_project, get_workspace
 from app.models.goal import Goal
 from app.models.workspace import Workspace
@@ -27,6 +28,7 @@ def _uuid(value: str, resource: str) -> uuid.UUID:
 
 
 class GoalCreateRequest(BaseModel):
+    request_id: uuid.UUID | None = None
     workspace_id: str
     title: str = Field(min_length=1, max_length=240)
     description: str = Field(default="", max_length=4000)
@@ -98,12 +100,18 @@ async def create_goal(payload: GoalCreateRequest, user_id: str = Depends(get_cur
     workspace = await get_workspace(session, uid, _uuid(payload.workspace_id, "Workspace"))
     if workspace is None:
         raise NotFoundException("Workspace")
+    fingerprint, receipt = await prepare_mutation(session, uid, workspace.id, payload.request_id, "goal_create", payload)
+    if receipt is not None:
+        return ApiResponse(success=True, data=GoalResponse.model_validate(receipt))
     goal = Goal(id=uuid.uuid4(), user_id=uid, workspace_id=workspace.id, project_id=await _project(session, uid, workspace.id, payload.project_id), title=payload.title, description=payload.description, dimension=payload.dimension, goal_type=payload.goal_type, due_at=payload.due_at, importance=payload.importance, target_metric=payload.target_metric)
     session.add(goal)
     await append_event(session, user_id=uid, workspace_id=workspace.id, project_id=goal.project_id, event_type="goal_created", source_type="goal", source_id=goal.id, payload={"title": goal.title, "goal_type": goal.goal_type, "importance": goal.importance})
-    await session.commit()
+    await session.flush()
     await session.refresh(goal)
-    return ApiResponse(success=True, data=_response(goal))
+    result = _response(goal)
+    record_mutation(session, uid, workspace.id, payload.request_id, fingerprint, result)
+    await session.commit()
+    return ApiResponse(success=True, data=result)
 
 
 @router.get("", response_model=ApiResponse[list[GoalResponse]])

@@ -13,7 +13,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user_id
 from app.core.exceptions import NotFoundException, ValidationException
 from app.engines.daily_preferences import user_today
-from app.engines.reflection_engine import list_workspace_reflections, save_reflection
+from app.engines.reflection_engine import list_workspace_reflections, save_reflection, validate_capture_replay
 from app.engines.task_engine import get_task
 from app.engines.workspace_engine import get_project, get_workspace
 from app.models.goal import Goal
@@ -51,6 +51,7 @@ class ReflectionSaveRequest(BaseModel):
     goal_id: str | None = None
     task_id: str | None = None
     is_makeup: bool = False
+    client_request_id: uuid.UUID | None = None
 
     @field_validator("intention", "wins", "friction", "adjustment", "mood", "micro_status", "content")
     @classmethod
@@ -59,6 +60,8 @@ class ReflectionSaveRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_reflection_shape(self) -> "ReflectionSaveRequest":
+        if self.client_request_id is not None and self.reflection_type != "micro":
+            raise ValueError("提交标识仅用于快速记录")
         if self.reflection_type == "morning" and self.energy is None:
             raise ValueError("晨间启动需要能量值")
         if self.reflection_type == "evening" and self.completion is None:
@@ -92,6 +95,7 @@ class ReflectionResponse(BaseModel):
     is_makeup: bool
     created_at: str
     updated_at: str
+    client_request_id: str | None = None
 
 
 def _response(item: WorkspaceReflection) -> ReflectionResponse:
@@ -116,6 +120,10 @@ def _response(item: WorkspaceReflection) -> ReflectionResponse:
         is_makeup=item.is_makeup,
         created_at=item.created_at.isoformat(),
         updated_at=item.updated_at.isoformat(),
+        client_request_id=(
+            str(uuid.UUID(hex=item.reflection_key))
+            if item.reflection_type == "micro" and item.reflection_key else None
+        ),
     )
 
 
@@ -161,10 +169,25 @@ async def save_reflection_endpoint(
     user = (await session.execute(select(User).where(User.id == uid))).scalar_one_or_none()
     if user is None:
         raise NotFoundException("User")
+    if payload.client_request_id:
+        existing = (await session.execute(select(WorkspaceReflection).where(
+            WorkspaceReflection.user_id == uid,
+            WorkspaceReflection.workspace_id == workspace.id,
+            WorkspaceReflection.reflection_key == payload.client_request_id.hex,
+            WorkspaceReflection.reflection_type == "micro",
+        ))).scalar_one_or_none()
+        if existing is not None:
+            # Previously accepted links remain valid evidence after their project is archived.
+            values = payload.model_dump()
+            for field, resource in (("project_id", "Project"), ("goal_id", "Goal"), ("task_id", "Task")):
+                values[field] = _uuid(values[field], resource) if values[field] else None
+            validate_capture_replay(existing, values)
+            return ApiResponse(success=True, data=_response(existing))
     project_id, goal_id, task_id = await _links(session, uid, workspace.id, payload)
     reflection = await save_reflection(
         session,
         workspace=workspace,
+        client_request_id=payload.client_request_id,
         values={
             "project_id": project_id,
             "goal_id": goal_id,

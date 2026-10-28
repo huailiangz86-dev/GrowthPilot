@@ -1,0 +1,7 @@
+{
+  "real_request_report": "p0r4c-summary-quality-2026-10-20.json",
+  "recheck": "offline render only; zero new model requests",
+  "renderer_sha256": "66ff6da21fbca0b9efaead69ebc83dde373fa162376e18364ff14f56076e8980",
+  "cases": 12,
+  "all_outputs_unchanged": true
+}

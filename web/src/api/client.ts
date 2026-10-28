@@ -4,12 +4,20 @@ interface ApiResponse<T = unknown> {
   success: boolean;
   data: T | null;
   error: string | null;
+  code?: string | null;
+}
+
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  constructor(message: string, status: number, code?: string) { super(message); this.status = status; this.code = code; }
 }
 
 export async function request<T>(
   url: string,
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
   data?: unknown,
+  options?: Pick<RequestInit, 'signal'>,
 ): Promise<T> {
   const token = localStorage.getItem('gp_token');
   const headers: Record<string, string> = {
@@ -19,7 +27,7 @@ export async function request<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const config: RequestInit = { method, headers };
+  const config: RequestInit = { method, headers, ...options };
 
   if (data && method !== 'GET') {
     config.body = JSON.stringify(data);
@@ -53,15 +61,15 @@ export async function request<T>(
   const body = (await response.json()) as ApiResponse<T>;
 
   if (!body.success) {
-    throw new Error(body.error || 'Request failed');
+    throw new ApiError(typeof body.error === 'string' ? body.error : 'Request failed', response.status, body.code ?? undefined);
   }
 
   return body.data as T;
 }
 
 export const api = {
-  get: <T>(url: string, params?: Record<string, unknown>) => request<T>(url, 'GET', params),
-  post: <T>(url: string, data?: unknown) => request<T>(url, 'POST', data),
+  get: <T>(url: string, params?: Record<string, unknown>, options?: Pick<RequestInit, 'signal'>) => request<T>(url, 'GET', params, options),
+  post: <T>(url: string, data?: unknown, options?: Pick<RequestInit, 'signal'>) => request<T>(url, 'POST', data, options),
   put: <T>(url: string, data?: unknown) => request<T>(url, 'PUT', data),
   patch: <T>(url: string, data?: unknown) => request<T>(url, 'PATCH', data),
   delete: <T>(url: string) => request<T>(url, 'DELETE'),

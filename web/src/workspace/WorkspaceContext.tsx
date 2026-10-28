@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { applyOnboardingResult, createOnboardingSubmission, isolateOnboardingWorkspaces, persistOnboardingSubmission, readOnboardingSubmission, restoreOnboardingState, type OnboardingResult, type OnboardingSubmission } from './onboardingSync';
+import { captureOwnerId, captureReflection, captureRequest, queueCapture, readCaptureQueue, removeQueuedCapture, restoreQueuedCaptures, type CaptureSaveResult } from './captureSync';
 import {
   cloneDefaultState,
   createId,
@@ -80,6 +82,7 @@ function applyTaskProgress(
     }
     : item);
   const updatedPlans = state.plans.map((plan) => {
+    if (plan.executionEnabled) return plan;
     const relatedTasks = nextTasks.filter((item) => item.planId === plan.id);
     if (!relatedTasks.length) return plan;
     const completedCount = relatedTasks.filter((item) => item.status === 'done').length;
@@ -150,20 +153,69 @@ function knowledgeCardTitle(input: KnowledgeCardInput) {
 }
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<WorkspaceState>(loadWorkspaceState);
+  const [onboardingSubmission, setOnboardingSubmission] = useState<OnboardingSubmission | null>(() => {
+    try {return readOnboardingSubmission(localStorage, captureOwnerId(localStorage.getItem('gp_token')));} catch {return null;}
+  });
+  const onboardingRef = useRef(onboardingSubmission);
+  const onboardingRequests = useRef(new Map<string, Promise<OnboardingSubmission>>());
+  const [state, setState] = useState<WorkspaceState>(() => {
+    const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+    const loaded = isolateOnboardingWorkspaces(loadWorkspaceState(), ownerId);
+    try {
+      const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+      const captures = restoreQueuedCaptures(loaded.captures, readCaptureQueue(window.localStorage, ownerId), ownerId);
+      const known = new Set(loaded.reflections.map(item => item.clientRequestId));
+      const restored = {...loaded, captures, reflections: [...captures.filter(item => item.clientRequestId && !known.has(item.clientRequestId) && item.syncState !== 'synced').map(captureReflection), ...loaded.reflections]};
+      return onboardingSubmission && !onboardingSubmission.saved ? restoreOnboardingState(restored, onboardingSubmission) : restored;
+    } catch { return loaded; }
+  });
+  const [hydrationStatus, setHydrationStatus] = useState<'loading' | 'ready' | 'partial' | 'error' | 'empty'>('loading');
+  const [hydrationAttempt, setHydrationAttempt] = useState(0);
+  const retryHydration = useCallback(() => setHydrationAttempt(value => value + 1), []);
+  const captureRequests = useRef(new Map<string, Promise<CaptureSaveResult>>());
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+      state.captures.filter(item => item.clientRequestId && item.syncState === 'synced' && item.ownerId === ownerId).forEach(item => {
+        removeQueuedCapture(window.localStorage, ownerId, item.clientRequestId!);
+      });
+    } catch {
+      // Keep the durable queue until the workspace cache can be saved.
+    }
   }, [state]);
 
   useEffect(() => {
     if (!window.localStorage.getItem('gp_token')) return;
     let cancelled = false;
+    setHydrationStatus('loading');
     const hydrate = async () => {
+      let hydrationSubmission = onboardingRef.current;
       try {
+        const pending = onboardingRef.current;
+        if (pending && !pending.saved) {
+          try {
+            const result = await api.get<OnboardingResult>(`/onboarding/context/submissions/${pending.requestId}`);
+            if (cancelled || onboardingRef.current !== pending || captureOwnerId(localStorage.getItem('gp_token')) !== pending.ownerId) return;
+            const recovered = applyOnboardingResult(pending, result);
+            persistOnboardingSubmission(localStorage, recovered);
+            onboardingRef.current = recovered;
+            hydrationSubmission = recovered;
+            setOnboardingSubmission(recovered);
+            setState(current => restoreOnboardingState(current, recovered));
+          } catch {
+            // Without a save receipt, remote IDs cannot be matched safely to pending local objects.
+            if (!cancelled) setHydrationStatus('error');
+            return;
+          }
+        }
         const workspaces = await api.get<Array<{ id: string }>>('/workspaces');
-        const workspaceId = workspaces[0]?.id;
-        if (!workspaceId || cancelled) return;
+        const confirmedWorkspaceId = onboardingRef.current?.objects.find(item => item.key === 'workspace')?.id;
+        const preferredId = confirmedWorkspaceId ?? loadWorkspaceState().activeWorkspaceId;
+        const workspaceId = workspaces.find(item => item.id === preferredId)?.id ?? workspaces[0]?.id;
+        if (cancelled) return;
+        if (!workspaceId) {setHydrationStatus('empty'); return;}
         const dashboard = await api.get<DashboardPayload>('/dashboard/command-center', { workspace_id: workspaceId });
         const [dailyPreferencesResponse, privacyScopeResponse] = await Promise.all([
           api.get<DailyPreferencesPayload>('/onboarding/daily-preferences').catch(() => null),
@@ -184,10 +236,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           api.get<KnowledgeCardPayload[]>('/knowledge-cards', { workspace_id: workspaceId }),
           api.get<CapabilityPayload[]>('/capabilities', { workspace_id: workspaceId }),
         ]);
-        if (!cancelled) {
+        if (!cancelled && onboardingRef.current === hydrationSubmission) {
+          setHydrationStatus([tasksResult, goalsResult, plansResult, reflectionsResult, learningResult, knowledgeCardsResult, capabilitiesResult].every(result => result.status === 'fulfilled') && dailyPreferencesResponse && privacyScopeResponse ? 'ready' : 'partial');
           const reflections = reflectionsResult.status === 'fulfilled' ? reflectionsResult.value : null;
-          setState((current) => ({
-            ...mergeDashboardState(current, dashboard),
+          setState((current) => {
+            if (onboardingRef.current !== hydrationSubmission) return current;
+            const mergedDashboard = mergeDashboardState(current, dashboard);
+            const hydrated = {
+            ...mergedDashboard,
+            workspaces: [{...mergedDashboard.workspaces[0], ownerId: captureOwnerId(localStorage.getItem('gp_token'))}],
             dailyPreferences,
             ...(privacyScopeResponse ? { privacyScope: mapPrivacyScope(privacyScopeResponse) } : {}),
             ...(tasksResult.status === 'fulfilled' ? { tasks: tasksResult.value.map((item) => mapTaskPayload(item, dailyPreferences.timezone)) } : {}),
@@ -201,7 +258,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
                 'reflection-',
               ),
               captures: mergeHydratedItems(
-                reflections.map(captureFromReflectionPayload).filter((item): item is Capture => item !== null),
+                reflections.map(captureFromReflectionPayload).filter((item): item is Capture => item !== null).map(item => ({...item, ownerId: captureOwnerId(window.localStorage.getItem('gp_token')) ?? undefined})),
                 current.captures,
                 workspaceId,
                 'capture-',
@@ -226,15 +283,19 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
             ...(capabilitiesResult.status === 'fulfilled' ? {
               capabilities: capabilitiesResult.value.map(mapCapabilityPayload),
             } : {}),
-          }));
+          };
+            const submission = onboardingRef.current;
+            return submission && !submission.saved ? restoreOnboardingState(hydrated, submission) : hydrated;
+          });
         }
       } catch {
         // Keep the local workspace when cloud hydration is unavailable.
+        if (!cancelled) setHydrationStatus('error');
       }
     };
     void hydrate();
     return () => { cancelled = true; };
-  }, []);
+  }, [hydrationAttempt, onboardingSubmission?.saved]);
 
   const setActiveWorkspace = useCallback((workspaceId: string) => {
     setState((current) => current.workspaces.some((workspace) => workspace.id === workspaceId)
@@ -249,7 +310,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const workspaceId = state.activeWorkspaceId;
     const taskInput = {
       title: cleanTitle,
-      description: options.description ?? '由全局 AI Command Bar 快速创建。',
+      description: options.description ?? '由快捷输入创建。',
       priority: options.priority ?? 'medium',
       project_id: options.projectId ?? null,
       goal_id: options.goalId ?? null,
@@ -298,121 +359,81 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [state.activeWorkspaceId]);
 
-  const addGoal = useCallback((input: Pick<Goal, 'title'> & Partial<Pick<Goal, 'description' | 'dueAt' | 'importance' | 'projectId'>>) => {
+  const addGoal = useCallback(async (input: Pick<Goal, 'title'> & Partial<Pick<Goal, 'description' | 'dueAt' | 'importance' | 'projectId'>> & {requestId?: string}) => {
     const title = input.title.trim();
-    if (!title) return;
-    const localGoalId = createId('goal');
+    const token = window.localStorage.getItem('gp_token');
+    if (!title || !token) return false;
     const workspaceId = state.activeWorkspaceId;
-    const payload = {
-      title,
-      description: input.description?.trim() ?? '',
-      due_at: input.dueAt ?? null,
-      importance: input.importance ?? null,
-      project_id: input.projectId ?? null,
-    };
-    setState((current) => {
-      const goal: Goal = {
-        id: localGoalId,
-        workspaceId,
-        title: payload.title,
-        description: payload.description,
-        progress: 0,
-        horizon: payload.due_at ? `截止 ${payload.due_at.slice(0, 10)}` : '周期待补充',
-        dueAt: payload.due_at ?? undefined,
-        importance: payload.importance ?? undefined,
-        projectId: payload.project_id ?? undefined,
-      };
-      return {
-        ...current,
-        goals: [goal, ...current.goals],
-        activities: prependActivity(current, {
-          id: createId('activity'),
-          workspaceId,
-          type: 'plan',
-          title: `创建目标「${title}」`,
-          detail: '已加入当前 Workspace 的成长方向',
-          timeLabel: '刚刚',
-          tone: 'teal',
-        }),
-      };
-    });
-    if (window.localStorage.getItem('gp_token')) {
-      void api.post<GoalPayload>('/goals', { workspace_id: workspaceId, ...payload }).then((created) => {
-        setState((current) => ({
-          ...current,
-          goals: current.goals.map((goal) => goal.id === localGoalId ? mapGoalPayload(created) : goal),
-        }));
-      }).catch(() => {
-        // Keep the local goal when cloud creation is unavailable.
+    try {
+      const created = await api.post<GoalPayload>('/goals', {
+        workspace_id: workspaceId,
+        ...(input.requestId ? {request_id: input.requestId} : {}),
+        title,
+        description: input.description?.trim() ?? '',
+        due_at: input.dueAt ?? null,
+        importance: input.importance ?? null,
+        project_id: input.projectId ?? null,
       });
+      if (window.localStorage.getItem('gp_token') !== token) return false;
+      setState(current => ({
+        ...current,
+        goals: [mapGoalPayload(created), ...current.goals.filter(goal => goal.id !== created.id)],
+        activities: current.goals.some(goal => goal.id === created.id) ? current.activities : prependActivity(current, {
+          id: createId('activity'), workspaceId, type: 'plan', title: `创建目标「${title}」`,
+          detail: '已保存到当前 Workspace 的成长方向', timeLabel: '刚刚', tone: 'teal',
+        }),
+      }));
+      return true;
+    } catch (error) {
+      if (input.requestId) throw error;
+      return false;
     }
   }, [state.activeWorkspaceId]);
 
-  const addGrowthPlan = useCallback((input: Pick<GrowthPlan, 'goalId' | 'title'> & Partial<Pick<GrowthPlan, 'description' | 'projectId' | 'periodType' | 'totalWeeks' | 'milestones'>>) => {
+  const addGrowthPlan = useCallback(async (input: Pick<GrowthPlan, 'goalId' | 'title'> & Partial<Pick<GrowthPlan, 'description' | 'projectId' | 'periodType' | 'totalWeeks' | 'milestones'>> & {requestId?: string}) => {
     const title = input.title.trim();
-    if (!title || !input.goalId) return;
-    const localPlanId = createId('plan');
+    const token = window.localStorage.getItem('gp_token');
+    if (!title || !input.goalId || !token) return false;
     const workspaceId = state.activeWorkspaceId;
-    const payload = {
-      goal_id: input.goalId,
-      title,
-      description: input.description?.trim() ?? '',
-      project_id: input.projectId ?? null,
-      period_type: input.periodType ?? 'weekly',
-      total_weeks: input.totalWeeks ?? null,
-      milestones: (input.milestones ?? []).map((item) => item.trim()).filter(Boolean).slice(0, 12),
-    };
-    setState((current) => {
-      const plan: GrowthPlan = {
-        id: localPlanId,
-        workspaceId,
-        title: payload.title,
-        description: payload.description,
-        currentWeek: payload.total_weeks ? 1 : 1,
-        totalWeeks: payload.total_weeks ?? 1,
-        progress: 0,
-        goalId: payload.goal_id,
-        milestones: payload.milestones,
-        projectId: payload.project_id ?? undefined,
-        periodType: payload.period_type,
-      };
-      return {
-        ...current,
-        plans: [plan, ...current.plans],
-        goals: current.goals.map((goal) => goal.id === input.goalId ? { ...goal, planId: localPlanId } : goal),
-        activities: prependActivity(current, {
-          id: createId('activity'),
-          workspaceId,
-          type: 'plan',
-          title: `创建计划「${title}」`,
-          detail: '已连接到当前目标',
-          timeLabel: '刚刚',
-          tone: 'teal',
-        }),
-      };
-    });
-    if (window.localStorage.getItem('gp_token')) {
-      void api.post<GrowthPlanPayload>('/growth-plans', { workspace_id: workspaceId, ...payload }).then((created) => {
-        setState((current) => ({
-          ...current,
-          plans: current.plans.map((plan) => plan.id === localPlanId ? mapGrowthPlanPayload(created) : plan),
-          goals: current.goals.map((goal) => goal.planId === localPlanId ? { ...goal, planId: created.id } : goal),
-        }));
-      }).catch(() => {
-        // Keep the local growth plan when cloud creation is unavailable.
+    try {
+      const created = await api.post<GrowthPlanPayload>('/growth-plans', {
+        workspace_id: workspaceId,
+        ...(input.requestId ? {request_id: input.requestId} : {}),
+        goal_id: input.goalId,
+        title,
+        description: input.description?.trim() ?? '',
+        project_id: input.projectId ?? null,
+        period_type: input.periodType ?? 'weekly',
+        total_weeks: input.totalWeeks ?? null,
+        milestones: (input.milestones ?? []).map(item => item.trim()).filter(Boolean).slice(0, 12),
       });
+      if (window.localStorage.getItem('gp_token') !== token) return false;
+      setState(current => ({
+        ...current,
+        plans: [mapGrowthPlanPayload(created), ...current.plans.filter(plan => plan.id !== created.id)],
+        goals: current.goals.map(goal => goal.id === input.goalId ? {...goal, planId: created.id} : goal),
+        activities: current.plans.some(plan => plan.id === created.id) ? current.activities : prependActivity(current, {
+          id: createId('activity'), workspaceId, type: 'plan', title: `创建计划「${title}」`,
+          detail: '已保存并连接到当前目标', timeLabel: '刚刚', tone: 'teal',
+        }),
+      }));
+      return true;
+    } catch (error) {
+      if (input.requestId) throw error;
+      return false;
     }
   }, [state.activeWorkspaceId]);
 
-  const addLearningItem = useCallback((input: Pick<LearningItem, 'title'> & Partial<Pick<LearningItem, 'summary' | 'kind' | 'durationMinutes' | 'relatedGoalId' | 'projectId'>>) => {
+  const addLearningItem = useCallback(async (input: Pick<LearningItem, 'title'> & Partial<Pick<LearningItem, 'summary' | 'kind' | 'durationMinutes' | 'relatedGoalId' | 'projectId' | 'sourceUrl'>>) => {
     const title = input.title.trim();
-    if (!title) return;
+    if (!title) return false;
     const localLearningId = createId('learning');
     const workspaceId = state.activeWorkspaceId;
     const payload = {
       title,
       summary: input.summary?.trim() ?? '',
       kind: input.kind ?? 'note',
+      source_url: input.sourceUrl?.trim() || null,
       duration_minutes: input.durationMinutes ?? null,
       goal_id: input.relatedGoalId ?? null,
       project_id: input.projectId ?? null,
@@ -430,6 +451,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         relatedGoalId: payload.goal_id ?? undefined,
         projectId: payload.project_id ?? undefined,
         summary: payload.summary,
+        sourceUrl: payload.source_url ?? undefined,
       };
       return {
         ...current,
@@ -446,15 +468,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       };
     });
     if (window.localStorage.getItem('gp_token')) {
-      void api.post<LearningItemPayload>('/learning-items', { workspace_id: workspaceId, ...payload }).then((created) => {
+      return api.post<LearningItemPayload>('/learning-items', { workspace_id: workspaceId, ...payload }).then((created) => {
         setState((current) => ({
           ...current,
           learningItems: current.learningItems.map((item) => item.id === localLearningId ? mapLearningItemPayload(created) : item),
         }));
-      }).catch(() => {
-        // Keep the local learning item when cloud creation is unavailable.
-      });
+        return true;
+      }).catch(() => false);
     }
+    return false;
   }, [state.activeWorkspaceId]);
 
   const addKnowledgeCard = useCallback((input: KnowledgeCardInput): Promise<boolean> => {
@@ -1243,182 +1265,152 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [state.activeWorkspaceId, state.dailyPreferences.timezone, state.reflections]);
 
-  const addCapture = useCallback((input: string | CaptureInput): Promise<boolean> => {
-    const details = typeof input === 'string' ? { content: input } : input;
-    const cleanContent = details.content.trim();
-    if (!cleanContent) return Promise.resolve(false);
-    const workspaceId = state.activeWorkspaceId;
-    const localCaptureId = createId('capture');
-    const localReflectionId = createId('reflection');
-    const payload = {
-      reflection_type: 'micro' as const,
-      reflection_date: todayKey(state.dailyPreferences.timezone),
-      micro_type: details.type ?? 'idea',
-      micro_status: details.status ?? 'noted',
-      content: cleanContent,
-      project_id: details.projectId ?? null,
-      goal_id: details.goalId ?? null,
-      task_id: details.taskId ?? null,
-      is_makeup: false,
-    };
-    setState((current) => {
-      const capture: Capture = {
-        id: localCaptureId,
-        workspaceId,
-        type: payload.micro_type,
-        status: payload.micro_status,
-        content: payload.content,
-        capturedDate: payload.reflection_date,
-        projectId: payload.project_id ?? undefined,
-        goalId: payload.goal_id ?? undefined,
-        taskId: payload.task_id ?? undefined,
-        createdLabel: '刚刚',
-      };
-      const reflection: Reflection = {
-        id: localReflectionId,
-        workspaceId,
-        type: 'micro',
-        reflectionDate: capture.capturedDate,
-        captureId: capture.id,
-        microType: capture.type,
-        microStatus: capture.status,
-        content: capture.content,
-        projectId: capture.projectId,
-        goalId: capture.goalId,
-        taskId: capture.taskId,
-        isMakeup: false,
-        createdLabel: '刚刚',
-      };
-      return {
-        ...current,
-        captures: [capture, ...current.captures].slice(0, 40),
-        reflections: [reflection, ...current.reflections].slice(0, 60),
-        activities: prependActivity(current, {
-          id: createId('activity'),
-          workspaceId,
-          type: 'capture',
-          title: `${captureTypeLabel(capture.type)}：${cleanContent.slice(0, 28)}${cleanContent.length > 28 ? '...' : ''}`,
-          detail: `已关联${capture.taskId ? '任务' : capture.goalId ? '目标' : capture.projectId ? '项目' : '当前工作空间'}，写入 Workspace Event`,
-          timeLabel: '刚刚',
-          tone: capture.type === 'emotion' ? 'orange' : capture.type === 'learning' ? 'blue' : 'green',
-        }),
-      };
-    });
-    if (!window.localStorage.getItem('gp_token')) return Promise.resolve(true);
-    return api.post<ReflectionPayload>('/reflections', { workspace_id: workspaceId, ...payload }).then((created) => {
-        const capture = captureFromReflectionPayload(created);
-        if (!capture) return false;
-        setState((current) => ({
+  const syncQueuedCapture = useCallback((capture: Capture): Promise<CaptureSaveResult> => {
+    const requestId = capture.clientRequestId!;
+    const existing = captureRequests.current.get(requestId);
+    if (existing) return existing;
+    const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+    if (!ownerId || ownerId !== capture.ownerId) {
+      return Promise.resolve({captureId: capture.id, syncState: 'local', error: '这条记录属于原保存账户，不会自动上传。'});
+    }
+    if (!/^[0-9a-f-]{36}$/i.test(capture.workspaceId)) {
+      return Promise.resolve({captureId: capture.id, syncState: 'pending', error: '先完成工作空间同步，再同步这条记录。'});
+    }
+    const promise = (async (): Promise<CaptureSaveResult> => {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 12000);
+      setState(current => ({...current, captures: current.captures.map(item => item.clientRequestId === requestId ? {...item, syncState: 'syncing', syncError: undefined} : item)}));
+      try {
+        const created = await api.post<ReflectionPayload>('/reflections', captureRequest(capture, todayKey(state.dailyPreferences.timezone)), {signal: controller.signal});
+        const remote = captureFromReflectionPayload(created);
+        if (!remote || created.client_request_id !== requestId || remote.workspaceId !== capture.workspaceId) throw new Error('保存结果未匹配这条记录，原文仍保留，可重试确认。');
+        const synced: Capture = {...remote, ownerId: capture.ownerId};
+        setState(current => ({
           ...current,
-          reflections: current.reflections.map((reflection) => reflection.id === localReflectionId ? mapReflectionPayload(created) : reflection),
-          captures: current.captures.map((item) => item.id === localCaptureId ? capture : item),
+          captures: [synced, ...current.captures.filter(item => item.clientRequestId !== requestId && item.id !== synced.id)],
+          reflections: [mapReflectionPayload(created), ...current.reflections.filter(item => item.clientRequestId !== requestId && item.id !== created.id)],
+          activities: current.activities.map(item => item.id === `capture-activity-${requestId}` ? {...item, detail: '原始记录已同步，服务端已保存成长事实。'} : item),
         }));
-        return true;
-      }).catch(() => {
-        // Keep the local capture and its draft recovery path when cloud sync is unavailable.
-        return false;
-      });
-  }, [state.activeWorkspaceId, state.dailyPreferences.timezone]);
-
-  const applyOnboarding = useCallback((draft: OnboardingDraft, selected: OnboardingSelection, rawInput: string, onlyCapture = false) => {
-    setState((current) => {
-      const cleanRawInput = rawInput.trim();
-      if (!cleanRawInput) return current;
-      if (onlyCapture) {
-        const capture = {
-          id: createId('capture'),
-          workspaceId: current.activeWorkspaceId,
-          type: 'idea' as const,
-          status: 'noted' as const,
-          content: cleanRawInput,
-          capturedDate: todayKey(current.dailyPreferences.timezone),
-          createdLabel: '刚刚',
-        };
-        const reflection: Reflection = {
-          id: createId('reflection'),
-          workspaceId: current.activeWorkspaceId,
-          type: 'micro',
-          reflectionDate: capture.capturedDate,
-          captureId: capture.id,
-          microType: capture.type,
-          microStatus: capture.status,
-          content: capture.content,
-          isMakeup: false,
-          createdLabel: '刚刚',
-        };
-        const next = {
-          ...current,
-          captures: [capture, ...current.captures].slice(0, 40),
-          reflections: [reflection, ...current.reflections].slice(0, 60),
-        };
-        return {
-          ...next,
-          activities: prependActivity(next, {
-            id: createId('activity'),
-            workspaceId: current.activeWorkspaceId,
-            type: 'capture',
-            title: '保存首次表达',
-            detail: '原话已记录，之后可以从工作台继续整理',
-            timeLabel: '刚刚',
-            tone: 'green',
-          }),
-        };
+        return {captureId: synced.id, syncState: 'synced'};
+      } catch (error) {
+        const message = error instanceof Error && error.name !== 'AbortError' && error.name !== 'TypeError'
+          ? error.message : '网络暂不可用，原文已保留，可以稍后重试。';
+        const failed: Capture = {...capture, syncState: 'failed', syncError: message};
+        try {queueCapture(window.localStorage, failed);} catch { /* The original queued copy remains available. */ }
+        setState(current => ({...current, captures: current.captures.map(item => item.clientRequestId === requestId ? failed : item)}));
+        return {captureId: capture.id, syncState: 'failed', error: message};
+      } finally {
+        window.clearTimeout(timer);
+        captureRequests.current.delete(requestId);
       }
+    })();
+    captureRequests.current.set(requestId, promise);
+    return promise;
+  }, [state.dailyPreferences.timezone]);
 
-      if (!selected.workspace) return current;
-      const workspaceId = createId('workspace');
-      const workspace = { id: workspaceId, ...draft.workspace, updatedLabel: '刚刚创建' };
-      const projectId = selected.project ? createId('project') : undefined;
-      const goalId = selected.goal ? createId('goal') : undefined;
-      const planId = selected.plan && selected.goal ? createId('plan') : undefined;
-      const project = projectId ? { id: projectId, workspaceId, ...draft.project, status: 'active' as const, progress: 8, goalId, accent: draft.project.accent || workspace.color } : undefined;
-      const goal = goalId ? { id: goalId, workspaceId, ...draft.goal, progress: 0, planId } : undefined;
-      const plan = planId && goalId ? { id: planId, workspaceId, ...draft.plan, currentWeek: 1, progress: 0, goalId } : undefined;
-      const tasks = draft.tasks
-        .filter((_, index) => selected.tasks[index])
-        .map((task) => ({
-          id: createId('task'),
-          workspaceId,
-          ...task,
-          status: 'todo' as const,
-          source: 'ai' as const,
-          projectId: project?.id,
-          goalId: goal?.id,
-          planId: plan?.id,
-        }));
-      const learning = selected.learning ? {
-        id: createId('learning'),
-        workspaceId,
-        ...draft.learning,
-        status: 'queued' as const,
-        progress: 0,
-        relatedGoalId: goal?.id,
-      } : undefined;
-      const next = {
-        ...current,
-        activeWorkspaceId: workspaceId,
-        onboardingCompleted: true,
-        workspaces: [workspace, ...current.workspaces],
-        projects: project ? [project, ...current.projects] : current.projects,
-        goals: goal ? [goal, ...current.goals] : current.goals,
-        plans: plan ? [plan, ...current.plans] : current.plans,
-        tasks: [...tasks, ...current.tasks],
-        learningItems: learning ? [learning, ...current.learningItems] : current.learningItems,
-      };
-      return {
-        ...next,
-        activities: prependActivity(next, {
-          id: createId('activity'),
-          workspaceId,
-          type: 'workspace',
-          title: `AI 建立「${draft.workspace.name}」工作空间`,
-          detail: `原始表达已保留 · ${project ? '1 个项目 · ' : ''}${goal ? '1 个目标 · ' : ''}${plan ? '1 个计划 · ' : ''}${tasks.length} 个任务${learning ? ' · 1 个学习入口' : ''}`,
-          timeLabel: '刚刚',
-          tone: 'teal',
-        }),
-      };
-    });
+  const retryCapture = useCallback((captureId: string): Promise<CaptureSaveResult> => {
+    const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+    const queue = readCaptureQueue(window.localStorage, ownerId);
+    const capture = queue.find(item => item.id === captureId) ?? state.captures.find(item => item.id === captureId);
+    if (!capture) return Promise.reject(new Error('未找到这条待同步记录。'));
+    if (capture.syncState === 'synced' || !capture.clientRequestId) return Promise.resolve({captureId, syncState: capture.syncState ?? 'local'});
+    return syncQueuedCapture(capture);
+  }, [state.captures, syncQueuedCapture]);
+
+  const addCapture = useCallback((input: string | CaptureInput): Promise<CaptureSaveResult> => {
+    const details = typeof input === 'string' ? {content: input} : input;
+    const cleanContent = details.content.trim();
+    if (!cleanContent) return Promise.reject(new Error('请先留下一点内容。'));
+    const ownerId = captureOwnerId(window.localStorage.getItem('gp_token'));
+    const clientRequestId = details.clientRequestId ?? crypto.randomUUID();
+    const existing = readCaptureQueue(window.localStorage, ownerId).find(item => item.clientRequestId === clientRequestId);
+    if (existing) return syncQueuedCapture(existing);
+    const capture: Capture = {
+      id: `capture-${clientRequestId}`, clientRequestId, ownerId: ownerId ?? undefined,
+      workspaceId: state.activeWorkspaceId, type: details.type ?? 'idea', status: details.status ?? 'noted',
+      content: cleanContent, capturedDate: todayKey(state.dailyPreferences.timezone),
+      projectId: details.projectId, goalId: details.goalId, taskId: details.taskId,
+      createdLabel: '刚刚', syncState: ownerId ? 'pending' : 'local',
+    };
+    queueCapture(window.localStorage, capture);
+    setState(current => ({
+      ...current,
+      captures: [capture, ...current.captures],
+      reflections: [captureReflection(capture), ...current.reflections],
+      activities: prependActivity(current, {
+        id: `capture-activity-${clientRequestId}`, workspaceId: capture.workspaceId, type: 'capture',
+        title: `${captureTypeLabel(capture.type)}：${cleanContent.slice(0, 28)}${cleanContent.length > 28 ? '...' : ''}`,
+        detail: ownerId ? '原始记录已保留在本地，等待服务端同步。' : '原始记录仅保存在此浏览器。',
+        timeLabel: '刚刚', tone: capture.type === 'emotion' ? 'orange' : capture.type === 'learning' ? 'blue' : 'green',
+      }),
+    }));
+    return ownerId ? syncQueuedCapture(capture) : Promise.resolve({captureId: capture.id, syncState: 'local'});
+  }, [state.activeWorkspaceId, state.dailyPreferences.timezone, syncQueuedCapture]);
+
+  const syncOnboarding = useCallback((submission: OnboardingSubmission): Promise<OnboardingSubmission> => {
+    const existing = onboardingRequests.current.get(submission.requestId);
+    if (existing) return existing;
+    const ownerId = captureOwnerId(localStorage.getItem('gp_token'));
+    if (ownerId !== submission.ownerId) return Promise.reject(new Error('请回到确认这份方案的账户后重试。'));
+    const publish = (next: OnboardingSubmission) => {
+      persistOnboardingSubmission(localStorage, next);
+      onboardingRef.current = next;
+      setOnboardingSubmission(next);
+      setState(current => restoreOnboardingState(current, next));
+    };
+    if (!ownerId) {
+      const next = {...submission, error: '方案仅保存在此浏览器。请使用登录账户建立可同步的工作空间。'};
+      publish(next);
+      return Promise.resolve(next);
+    }
+    const syncing = {...submission, error: undefined, objects: submission.objects.map(item => item.status === 'synced' ? item : {...item, status: 'syncing' as const, error: null})};
+    publish(syncing);
+    const promise = (async () => {
+      try {
+        const result = await api.post<OnboardingResult>('/onboarding/context/complete', submission.payload);
+        if (captureOwnerId(localStorage.getItem('gp_token')) !== ownerId) throw new Error('账户已变化，请回到原账户查看保存结果。');
+        const next = applyOnboardingResult(submission, result);
+        publish(next);
+        return next;
+      } catch (error) {
+        const next = {...submission, saved: false, error: error instanceof Error ? error.message : '同步未完成，原话和方案仍在，请重试。', objects: submission.objects.map(item => item.status === 'synced' ? item : {...item, status: 'failed' as const, error: null})};
+        if (captureOwnerId(localStorage.getItem('gp_token')) === ownerId) {
+          try {persistOnboardingSubmission(localStorage, next);} catch { /* Earlier durable confirmation is retained. */ }
+          onboardingRef.current = next;
+          setOnboardingSubmission(next);
+          setState(current => restoreOnboardingState(current, next));
+        }
+        return next;
+      } finally {onboardingRequests.current.delete(submission.requestId);}
+    })();
+    onboardingRequests.current.set(submission.requestId, promise);
+    return promise;
   }, []);
+
+  const applyOnboarding = useCallback((draft: OnboardingDraft, selected: OnboardingSelection, rawInput: string): Promise<OnboardingSubmission> => {
+    const ownerId = captureOwnerId(localStorage.getItem('gp_token'));
+    const pending = onboardingRef.current ?? readOnboardingSubmission(localStorage, ownerId);
+    if (pending && !pending.saved) return syncOnboarding(pending);
+    if (pending?.saved && pending.ownerId === ownerId && pending.rawInput === rawInput.trim() && JSON.stringify(pending.draft) === JSON.stringify(draft) && JSON.stringify(pending.selected) === JSON.stringify(selected)) {
+      onboardingRef.current = pending;
+      setOnboardingSubmission(pending);
+      setState(current => restoreOnboardingState(current, pending));
+      return Promise.resolve(pending);
+    }
+    const submission = createOnboardingSubmission(draft, selected, rawInput, ownerId, state.dailyPreferences.timezone);
+    // Fail before changing the UI or making any request if durable local storage is unavailable.
+    persistOnboardingSubmission(localStorage, submission);
+    onboardingRef.current = submission;
+    setOnboardingSubmission(submission);
+    setState(current => restoreOnboardingState(current, submission));
+    return syncOnboarding(submission);
+  }, [state.dailyPreferences.timezone, syncOnboarding]);
+
+  const retryOnboarding = useCallback(() => {
+    const submission = onboardingRef.current;
+    if (!submission) return Promise.reject(new Error('没有可重试的确认方案。'));
+    return syncOnboarding(submission);
+  }, [syncOnboarding]);
 
   const skipOnboarding = useCallback(() => {
     setState((current) => ({ ...current, onboardingCompleted: true }));
@@ -1428,6 +1420,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setState(cloneDefaultState());
   }, []);
 
+  const acceptAgentTask = useCallback((payload: TaskPayload) => {
+    setState(current => {
+      const existing = current.tasks.find(task => task.id === payload.id);
+      const mapped = mapTaskPayload(payload,current.dailyPreferences.timezone);
+      if (existing) return {...current,tasks:current.tasks.map(task => task.id === payload.id ? {...mapped,source:task.source,agentSource:mapped.agentSource ?? task.agentSource}:task)};
+      const task: Task = {...mapped, source: payload.agent_source ? 'ai' : 'user'};
+      return {...current, tasks: [task, ...current.tasks], activities: prependActivity(current, {
+        id: `agent-action-${task.id}`, workspaceId: task.workspaceId, type: 'task', title: `${task.status === 'done' ? '记录行动结果' : '确认行动'}「${task.title}」`, detail: task.status === 'done' ? '已保存完成结果原文' : '已保留个人 Agent 对话与来源', timeLabel: '刚刚', tone: 'green',
+      })};
+    });
+  }, []);
   const activeWorkspace = state.workspaces.find((item) => item.id === state.activeWorkspaceId) ?? DEFAULT_WORKSPACE_STATE.workspaces[0];
   const activeProjects = useMemo(() => state.projects.filter((item) => item.workspaceId === state.activeWorkspaceId), [state.projects, state.activeWorkspaceId]);
   const activeGoals = useMemo(() => state.goals.filter((item) => item.workspaceId === state.activeWorkspaceId), [state.goals, state.activeWorkspaceId]);
@@ -1441,8 +1444,27 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const activeReflections = useMemo(() => state.reflections.filter((item) => item.workspaceId === state.activeWorkspaceId), [state.reflections, state.activeWorkspaceId]);
   const activeFocus = state.focusSession?.workspaceId === state.activeWorkspaceId ? state.focusSession : null;
 
+  const refreshExecutionData = useCallback(async () => {
+    const workspaceId = state.activeWorkspaceId;
+    if (!window.localStorage.getItem('gp_token')) return;
+    const [tasks, plans, learning] = await Promise.all([
+      api.get<TaskPayload[]>('/tasks', { workspace_id: workspaceId }),
+      api.get<GrowthPlanPayload[]>('/growth-plans', { workspace_id: workspaceId }),
+      api.get<LearningItemPayload[]>('/learning-items', { workspace_id: workspaceId }),
+    ]);
+    setState(current => current.activeWorkspaceId !== workspaceId ? current : ({
+      ...current,
+      tasks: mergeHydratedItems(tasks.map(item => mapTaskPayload(item, current.dailyPreferences.timezone)), current.tasks, workspaceId, 'task-'),
+      plans: mergeHydratedItems(plans.map(mapGrowthPlanPayload), current.plans, workspaceId, 'plan-'),
+      learningItems: mergeHydratedItems(learning.map(mapLearningItemPayload), current.learningItems, workspaceId, 'learning-'),
+    }));
+  }, [state.activeWorkspaceId]);
+
   const value = useMemo(() => ({
     state,
+    hydrationStatus,
+    retryHydration,
+    refreshExecutionData,
     activeWorkspace,
     activeProjects,
     activeGoals,
@@ -1459,6 +1481,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     privacyScope: state.privacyScope,
     setActiveWorkspace,
     addTask,
+    acceptAgentTask,
     addGoal,
     addGrowthPlan,
     addLearningItem,
@@ -1486,7 +1509,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     saveMorning,
     saveEvening,
     addCapture,
+    retryCapture,
+    onboardingSubmission,
     applyOnboarding,
+    retryOnboarding,
     skipOnboarding,
     resetWorkspaceData,
     startFocus,
@@ -1494,7 +1520,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     resumeFocus,
     completeFocus,
     exitFocus,
-  }), [state, activeWorkspace, activeProjects, activeGoals, activePlans, activeTasks, activeLearning, activeKnowledgeCards, activeActivities, activeInsights, activeCaptures, activeReflections, activeFocus, setActiveWorkspace, addTask, addGoal, addGrowthPlan, addLearningItem, addKnowledgeCard, retryKnowledgeCard, addKnowledgeCardToLearning, previewKnowledgeCardSummary, confirmKnowledgeCardSummary, updateKnowledgeCardContextLinks, updateCapabilitySettings, createCapabilityInvocationPreview, decideCapabilityInvocation, executeCapabilityInvocation, createTaskFromBriefFact, createGoalFromBriefFact, createGrowthPlanFromBriefFact, createKnowledgeCardFromBriefFact, createMemoryFromBriefFact, updateDailyPreferences, updatePrivacyScope, listCapabilityInvocations, updateTaskStatus, updateTaskDue, updateLearningProgress, startFocus, pauseFocus, resumeFocus, completeFocus, exitFocus, saveMorning, saveEvening, addCapture, applyOnboarding, skipOnboarding, resetWorkspaceData]);
+  }), [state, hydrationStatus, retryHydration, refreshExecutionData, activeWorkspace, activeProjects, activeGoals, activePlans, activeTasks, activeLearning, activeKnowledgeCards, activeActivities, activeInsights, activeCaptures, activeReflections, activeFocus, setActiveWorkspace, addTask, acceptAgentTask, addGoal, addGrowthPlan, addLearningItem, addKnowledgeCard, retryKnowledgeCard, addKnowledgeCardToLearning, previewKnowledgeCardSummary, confirmKnowledgeCardSummary, updateKnowledgeCardContextLinks, updateCapabilitySettings, createCapabilityInvocationPreview, decideCapabilityInvocation, executeCapabilityInvocation, createTaskFromBriefFact, createGoalFromBriefFact, createGrowthPlanFromBriefFact, createKnowledgeCardFromBriefFact, createMemoryFromBriefFact, updateDailyPreferences, updatePrivacyScope, listCapabilityInvocations, updateTaskStatus, updateTaskDue, updateLearningProgress, startFocus, pauseFocus, resumeFocus, completeFocus, exitFocus, saveMorning, saveEvening, addCapture, retryCapture, onboardingSubmission, applyOnboarding, retryOnboarding, skipOnboarding, resetWorkspaceData]);
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }

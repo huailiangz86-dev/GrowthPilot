@@ -1,0 +1,11 @@
+{
+  "host": "127.0.0.1",
+  "port": 8002,
+  "revision": "f0a4b5c6d7e8",
+  "schema_changed": false,
+  "table_count": 64,
+  "all_table_row_counts_unchanged": true,
+  "cloud_write_enabled": false,
+  "diagnosis_prompt": "v3",
+  "summary_prompt": "v2"
+}

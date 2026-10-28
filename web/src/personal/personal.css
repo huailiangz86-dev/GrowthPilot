@@ -1,0 +1,67 @@
+.gp-personal { min-height: 0; padding: 4px; background: transparent; }
+.gp-personal a { color: inherit; text-decoration: none; }
+.gp-personal .pp-primary, .gp-personal .pp-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.gp-personal .pp-primary { background: var(--pp-green); color: white; }
+.gp-personal .pp-priority-list>a { display: flex; gap: 20px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--pp-line); }
+.gp-personal .pp-priority-list>a>div { flex: 1; }
+.gp-personal .pp-focus { padding-bottom: 26px; }
+.gp-personal .pp-focus-excerpt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 6; line-clamp: 6; overflow: hidden; }
+.gp-personal small { display: block; color: var(--pp-muted); }
+.gp-personal .pp-work-rail { min-width: 0; }
+.gp-personal .pp-agenda-row { display: flex; align-items: center; gap: 16px; padding: 18px 0; border-bottom: 1px solid var(--pp-line); }
+.gp-personal .pp-agenda-row>a { flex: 1; min-width: 0; }
+.gp-personal .pp-agenda-row time { width: 100px; font-size: 12px; flex-shrink: 0; }
+.gp-personal .pp-agenda-row time small { font-size: 10px; }
+.gp-personal textarea { width: 100%; border: 1px solid var(--pp-line); border-radius: 6px; padding: 12px; background: #fffefb; resize: vertical; min-height: 110px; }
+.gp-personal .pp-document-editor { min-height: 470px; border: 0; border-radius: 0; padding: 22px; line-height: 1.85; }
+.gp-personal .pp-task-properties { padding: 16px; }
+.gp-personal .pp-work-row { min-width: 0; }
+.gp-personal .pp-work-row>div { min-width: 0; }
+.gp-personal .pp-work-row p { overflow-wrap: anywhere; }
+.gp-personal .pp-task-meta { flex-wrap: wrap; }
+.gp-save-state { font-size: 11px; color: var(--pp-muted); }
+.gp-save-state>button { margin-left: 12px; }
+.gp-save-state pre, .gp-draft-backups pre { max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.gp-content-compare { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin: 16px 0; }
+.gp-saved-content { max-height: 360px; overflow: auto; padding: 12px; background: #fffefb; border: 1px solid var(--pp-line); }
+.gp-saved-content p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0 16px; }
+.gp-outcome, .gp-materials { padding: 18px; border: 1px solid var(--pp-line); border-radius: 8px; background: var(--pp-paper); }
+.gp-outcome h3 { margin-top: 0; }
+.gp-resources form { margin: 18px 0; }
+.gp-resources small { overflow-wrap: anywhere; font-size: 10px; }
+.gp-personal .pp-learning-layout { grid-template-columns: minmax(0,2fr) minmax(270px,1fr); gap: 28px; }
+.gp-learning-main { padding: 24px; min-width: 0; }
+.gp-learning-editor { min-height: 220px!important; }
+.gp-evidence { padding: 22px 0; border-bottom: 1px solid var(--pp-line); overflow-wrap: anywhere; }
+.gp-evidence p { white-space: pre-wrap; }
+.gp-evidence small { font-size: 10px; }
+.gp-content-preview { padding: 22px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.gp-content-preview blockquote { border-left: 3px solid var(--pp-green); margin-left: 0; padding-left: 15px; color: var(--pp-muted); }
+.gp-content-preview p { margin: 8px 0; }
+.gp-list-line { padding-left: 10px; }
+.gp-review-date { max-width: 300px; }
+.gp-legacy { padding: 15px; white-space: pre-wrap; }
+.gp-draft-backups { margin-top: 28px; color: var(--pp-muted); }
+.gp-observed { padding: 12px 0; }
+.gp-personal .pp-calendar-event { padding: 10px; }
+.gp-personal .pp-calendar-event strong { display: block; overflow-wrap: anywhere; }
+.pp-modal { --pp-paper:#fffefb; --pp-line:#e3e8df; --pp-ink:#273a32; --pp-green:#355f47; --pp-muted:#758075; }
+.pp-modal input, .pp-modal select, .pp-modal textarea { font: inherit; width: 100%; min-width: 0; }
+.pp-modal .pp-primary { background: #355f47; color: white; }
+@media(max-width:760px) {
+  .gp-content-compare { grid-template-columns: minmax(0,1fr); }
+  .gp-personal .pp-page-heading { gap: 14px; }
+  .gp-personal .pp-page-heading h1 { font-size: 27px; }
+  .gp-personal .pp-document-editor { min-height: 410px; padding: 16px; font-size: 16px; }
+  .gp-personal .pp-document-layout, .gp-personal .pp-learning-layout { grid-template-columns: minmax(0,1fr); }
+  .gp-personal .pp-work-row { flex-wrap: wrap; gap: 12px; }
+  .gp-personal .pp-work-row>div { flex: 1; }
+  .gp-personal .pp-agenda-row { gap: 10px; }
+  .gp-personal .pp-agenda-row time { width: 83px; }
+  .gp-personal .pp-work-rail { display: flex; flex-direction: column; gap: 18px; }
+  .gp-personal input, .gp-personal select, .gp-personal textarea, .pp-modal input, .pp-modal select { font-size: 16px; }
+  .gp-learning-main { padding: 16px; }
+}
+
+.gp-over-capacity { color: #9c5634!important; }
+.gp-preferences-form { padding: 16px 0; display: grid; gap: 12px; max-width: 400px; }

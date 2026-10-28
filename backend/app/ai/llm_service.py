@@ -73,11 +73,10 @@ async def _record_call(
 def _select_provider(variant: PromptVariant) -> tuple[BaseLLMProvider, str]:
     """Select provider and model based on prompt variant preference."""
     pref = variant.model_preference
-    if "deepseek" in pref:
-        return _primary, pref
-    if "qwen" in pref:
-        return _fallback, pref
-    return _primary, PROVIDER_MODELS["deepseek"]
+    for provider in (_primary, _fallback):
+        if provider.name in pref:
+            return provider, pref
+    return _primary, PROVIDER_MODELS[_primary.name]
 
 
 async def structured_output(
@@ -101,11 +100,13 @@ async def structured_output(
     ]
 
     provider, model = _select_provider(variant)
+    alternate = _fallback if provider is _primary else _primary
     last_error: Exception | None = None
 
-    for attempt in range(MAX_RETRIES):
-        current_provider = provider if attempt < 2 else _fallback
-        current_model = model if attempt < 2 else PROVIDER_MODELS.get(_fallback.name, "qwen-plus")
+    attempts = 1 if variant.data.get('evidence_selection', False) else MAX_RETRIES
+    for attempt in range(attempts):
+        current_provider = provider if attempt < 2 else alternate
+        current_model = model if attempt < 2 else PROVIDER_MODELS[alternate.name]
 
         start = time.monotonic()
         try:
@@ -172,7 +173,7 @@ async def structured_output(
                 error_message=str(e)[:500],
             )
 
-    raise LLMServiceException(f"All {MAX_RETRIES} attempts failed: {last_error}")
+    raise LLMServiceException(f"All {attempts} attempts failed: {last_error}")
 
 
 async def stream_chat(
@@ -264,7 +265,7 @@ async def classify(
     try:
         response = await _primary.chat(
             messages=messages,
-            model="deepseek-chat",
+            model=PROVIDER_MODELS[_primary.name],
             temperature=0.1,
             max_tokens=50,
         )
@@ -299,7 +300,7 @@ async def classify(
             session=session,
             user_id=user_id,
             purpose=purpose,
-            model="deepseek-chat",
+            model=PROVIDER_MODELS[_primary.name],
             prompt_version="classify",
             input_tokens=0,
             output_tokens=0,

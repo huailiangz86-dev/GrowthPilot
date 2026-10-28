@@ -1,0 +1,38 @@
+{
+  "protocol_version": "p2-v1-2026-10-20",
+  "prepared_at": "2026-10-20T16:04:11.013506+08:00",
+  "status": "materials_ready_real_use_pending",
+  "participant_plan": "founder_first_then_6_to_8",
+  "start_date": null,
+  "task_pack_sha256": "3d8f133bb024ff481e36703a55ffd8edd45b39d9369eb0fef8535734288a5495",
+  "source_sha256": {
+    "S1": "7fee65312f1fc1b9d90ee85b4f173d3a3c13f8a90be23b57267abe174ecc13c6",
+    "S2": "85096003ebdf123b51993665308fe5284997c34d527e41be8b3d4fdfc3349821"
+  },
+  "task_ids": [
+    "T1",
+    "T2a",
+    "T2b",
+    "T3"
+  ],
+  "scored_criteria": 8,
+  "human_trial_sessions": [],
+  "workbuddy_status": "no_usable_environment_in_current_session",
+  "workbuddy_requests": 0,
+  "growthpilot_model_requests_this_turn": 0,
+  "baseline": {
+    "database_revision": "f0a4b5c6d7e8",
+    "table_count": 64,
+    "qwen_configured": true,
+    "learning_entry": "reaches_login_in_fresh_session"
+  },
+  "verification": {
+    "canvas_typescript": "pass",
+    "task_structure": "pass",
+    "protocol_local_links": "pass",
+    "canvas_interaction_preview": "not_verified_host_open_queued_and_native_app_inspection_unavailable"
+  },
+  "canvas_path": "/Users/zhang/.cursor/projects/Users-zhang-Documents-GrowthPilot/canvases/growthpilot-P2-trial.canvas.tsx",
+  "product_code_changed": false,
+  "reminder_created": false
+}

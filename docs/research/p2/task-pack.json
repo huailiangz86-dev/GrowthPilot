@@ -1,0 +1,82 @@
+{
+  "protocol_version": "p2-v1-2026-10-20",
+  "status": "prepared_not_executed",
+  "data_kind": "wholly_fictional_research_material",
+  "purpose": "same-task workflow cost and bounded output quality; no comparative learning-effect claim",
+  "freeze_rule": "保存任务包 SHA256 后才运行；改动另存版本，不覆盖原结果。",
+  "sources": [
+    {
+      "id": "S1",
+      "version": 1,
+      "title": "澄叶小组资料整理试用记录",
+      "text": "澄叶小组的8位自愿参加者试用了资料整理助手10天，其中6人在问卷中表示找资料比以前省心。本次没有对照组，没有测量实际检索耗时，也没有测量工作成果质量。参加者来自同一小组，结果只反映这次参加者的自报感受，不能据此认定助手提高了效率。"
+    },
+    {
+      "id": "S2",
+      "version": 1,
+      "title": "澄叶小组归档规则",
+      "text": "归档前核对文件名称、来源和版本日期；缺少任一项时，先补齐再归档。原件必须保留。AI整理结果由本人对照原件确认后才能采用；看过解释或生成了总结不代表已经学会。"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "goal": "用S1和S2完成一份有依据的下一轮试用建议，并保存为可回查的成果。",
+      "common_instruction": "请仅依据所提供的S1与S2，帮我准备一份下一轮试用建议。保留具体数字、原文出处及不能得出的结论，说明下一轮准备怎样核对实际效果。区分资料中的事实与我提出的计划，不访问外部资料，不声称计划已经执行。允许先提供有出处的摘录，由我写出最终建议。",
+      "budget_minutes_per_product": 15,
+      "rubric": [
+        {"id": "T1.1", "point": 1, "criterion": "正确保留8人、10天、6人自报，未偷换为实际测量。"},
+        {"id": "T1.2", "point": 1, "criterion": "保留无对照、未测检索耗时、未测成果质量及同组自愿样本的限制，不认定效率提升。"},
+        {"id": "T1.3", "point": 1, "criterion": "采用的事实能回查到S1或S2的对应原文，没有伪造出处或添加资料不存在的结果。"},
+        {"id": "T1.4", "point": 1, "criterion": "最终建议有本人确认的下一轮可观察核对办法，明确是计划，遵守保留原件与本人核对。"}
+      ],
+      "severe_errors": ["把自报感受写成已经提高效率", "虚构因果、测量或对照结果", "伪造或错配来源", "把计划写成已经执行"]
+    },
+    {
+      "id": "T2a",
+      "question": "归档前核对什么，缺项怎么办？",
+      "reference_source": "S2",
+      "reference": "归档前核对文件名称、来源和版本日期；缺少任一项时，先补齐再归档。原件必须保留。",
+      "fixed_answer": "先确认文件叫什么、出自哪里、是哪天的版本；缺哪项就补哪项再存档，原始文件也留下。",
+      "self_report": "我不太确定自己的回答。",
+      "common_instruction": "只核对这道题的原文与答案含义。给出本次判断、双方原话依据与一个可核对的下一步；不要从信心推断掌握程度，不根据本题之外的内容判错。",
+      "rubric": [
+        {"id": "T2a.1", "point": 1, "criterion": "认定给定原文范围内未观察到遗漏或矛盾，接受同义改写。"},
+        {"id": "T2a.2", "point": 1, "criterion": "依据分别来自实际原文和答案，不因自报不确定判错，不推断长期能力。"}
+      ],
+      "severe_errors": ["把正确改写判错", "根据不自信推断不理解或未掌握"]
+    },
+    {
+      "id": "T2b",
+      "question": "归档前核对什么，缺项怎么办？",
+      "reference_source": "S2",
+      "reference": "归档前核对文件名称、来源和版本日期；缺少任一项时，先补齐再归档。原件必须保留。",
+      "fixed_answer": "核对文件名称和来源，缺项补齐再归档，并保留原件。",
+      "self_report": "我觉得答得很好。",
+      "common_instruction": "只核对这道题的原文与答案含义。给出本次判断、双方原话依据与一个可核对的下一步；不要从信心推断掌握程度，不根据本题之外的内容判错。",
+      "rubric": [
+        {"id": "T2b.1", "point": 1, "criterion": "只指出答案未提版本日期，不捏造顺序错误、反向含义或其他缺项。"},
+        {"id": "T2b.2", "point": 1, "criterion": "用双方原话定位差异，下一步要求补版本日期并对照原文，不推断能力或心理原因。"}
+      ],
+      "severe_errors": ["漏掉唯一明确缺项仍声称答案完整", "添加原文不支持的错误或能力归因"]
+    },
+    {
+      "id": "T3",
+      "goal": "实际间隔至少24小时后找回T1成果、原文版本及当时未完成的下一步。",
+      "common_instruction": "请让我回到上次的试用建议及其原文依据，找到当时尚未完成的一步，不把上次生成内容当成本次执行结果。",
+      "measure": ["实际间隔小时和本地日期", "是否找回旧原文与成果", "操作秒和等待秒", "需要重新输入的背景次数", "本人是否愿意继续及原话"],
+      "scoring": "逐项描述，不并入T1/T2分数；无真实跨日操作时保持待执行。"
+    }
+  ],
+  "comparison_rules": {
+    "initial_setup_budget_minutes": 20,
+    "first_output_and_one_correction_recorded_separately": true,
+    "failure_and_unknown_cost_not_zero": true,
+    "product_configuration_recorded": true,
+    "human_work_counted": true,
+    "founder_trial_not_novice_user_evidence": true,
+    "same_task_order_effect_reported": true,
+    "not_a_learning_outcome_benchmark": true,
+    "reviewer_identity_required": true
+  }
+}

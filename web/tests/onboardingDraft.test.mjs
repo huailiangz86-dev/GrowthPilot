@@ -46,5 +46,5 @@ test('确认载荷只包含已确认的真实领域对象', () => {
   assert.equal(payload.raw_input, '我正在准备产品发布。');
   assert.equal(payload.workspace?.name, draft.workspace.name);
   assert.equal(payload.project, undefined);
-  assert.equal(payload.profile?.current_project, draft.project.name);
+  assert.equal(payload.profile?.current_project, '');
 });

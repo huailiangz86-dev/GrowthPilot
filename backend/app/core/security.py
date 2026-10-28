@@ -8,6 +8,15 @@ from jose import JWTError, jwt
 from app.core.config import settings
 
 
+def validate_auth_configuration() -> None:
+    if settings.APP_ENV != "production":
+        return
+    if settings.DEV_AUTH_ENABLED:
+        raise RuntimeError("正式环境不能开启开发登录")
+    if settings.JWT_SECRET == "growthpilot-change-me-in-production" or len(settings.JWT_SECRET) < 32:
+        raise RuntimeError("正式环境必须配置独立且至少 32 字符的 JWT_SECRET")
+
+
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(UTC) + timedelta(days=settings.JWT_EXPIRE_DAYS)

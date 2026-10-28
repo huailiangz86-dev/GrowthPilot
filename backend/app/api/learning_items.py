@@ -1,6 +1,7 @@
 """Workspace Learning Item API."""
 
 import uuid
+from urllib.parse import urlsplit
 from typing import Literal
 
 from fastapi import APIRouter, Depends
@@ -36,6 +37,18 @@ class LearningItemCreateRequest(BaseModel):
     duration_minutes: int | None = Field(default=None, ge=1, le=10080)
     project_id: str | None = None
     goal_id: str | None = None
+    source_url: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("source_url")
+    @classmethod
+    def validate_source_url(cls, value: str | None) -> str | None:
+        if not value or not value.strip():
+            return None
+        value = value.strip()
+        parsed = urlsplit(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+            raise ValueError("学习链接必须是 HTTP 或 HTTPS 地址")
+        return value
 
     @field_validator("title")
     @classmethod
@@ -55,6 +68,22 @@ class LearningProgressRequest(BaseModel):
     progress: int = Field(ge=0, le=100)
 
 
+class StudyRequest(BaseModel):
+    id: uuid.UUID
+    active: bool = True
+    complete: bool = False
+    note: str | None = Field(default=None, max_length=4000)
+
+
+class LearningSourceRequest(BaseModel):
+    source_url: str | None = Field(default=None, max_length=2000)
+
+    @field_validator("source_url")
+    @classmethod
+    def valid_source(cls, value):
+        return LearningItemCreateRequest.validate_source_url(value)
+
+
 class LearningItemResponse(BaseModel):
     id: str
     workspace_id: str
@@ -69,6 +98,7 @@ class LearningItemResponse(BaseModel):
     progress_updated_at: str | None
     created_at: str
     updated_at: str
+    source_url: str | None = None
 
 
 def _response(item: WorkspaceLearningItem) -> LearningItemResponse:
@@ -86,6 +116,7 @@ def _response(item: WorkspaceLearningItem) -> LearningItemResponse:
         progress_updated_at=item.progress_updated_at.isoformat() if item.progress_updated_at else None,
         created_at=item.created_at.isoformat(),
         updated_at=item.updated_at.isoformat(),
+        source_url=item.source_url,
     )
 
 
@@ -133,11 +164,22 @@ async def create_learning_item_endpoint(
             "summary": payload.summary,
             "kind": payload.kind,
             "duration_minutes": payload.duration_minutes,
+            "source_url": payload.source_url,
         },
     )
     await session.commit()
     await session.refresh(item)
     return ApiResponse(success=True, data=_response(item))
+
+
+@router.post("/{item_id}/study")
+async def record_study(item_id: str, payload: StudyRequest, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db)):
+    from app.engines.learning_session_engine import study_session
+    row, item = await study_session(session, _uuid(user_id, "User"), _uuid(item_id, "LearningItem"), payload.id,
+        active=payload.active, complete=payload.complete, note=payload.note)
+    await session.commit()
+    return ApiResponse(success=True, data={"session_id": str(row.id), "active_seconds": row.active_seconds,
+        "finished_at": row.finished_at.isoformat() if row.finished_at else None, "item": _response(item)})
 
 
 @router.get("", response_model=ApiResponse[list[LearningItemResponse]])
@@ -152,6 +194,17 @@ async def list_learning_items_endpoint(
         raise NotFoundException("Workspace")
     items = await list_learning_items(session, uid, workspace.id)
     return ApiResponse(success=True, data=[_response(item) for item in items])
+
+
+@router.patch("/{item_id}/source", response_model=ApiResponse[LearningItemResponse])
+async def update_learning_source(item_id: str, payload: LearningSourceRequest, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db)):
+    item = await get_learning_item(session, _uuid(user_id, "User"), _uuid(item_id, "LearningItem"))
+    if item is None:
+        raise NotFoundException("LearningItem")
+    item.source_url = payload.source_url
+    await session.commit()
+    await session.refresh(item)
+    return ApiResponse(success=True, data=_response(item))
 
 
 @router.patch("/{item_id}/progress", response_model=ApiResponse[LearningItemResponse])

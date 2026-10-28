@@ -1,0 +1,20 @@
+{
+  "frontend_tests": 148,
+  "backend_tests": 96,
+  "backend_skipped": 0,
+  "production_build": "passed",
+  "lint": "passed",
+  "browser_workflow_checks": 15,
+  "browser_recovery_checks": 3,
+  "viewport_checks": 12,
+  "viewport_widths": [
+    375,
+    1440
+  ],
+  "runtime_errors_observed": 0,
+  "bounded_quality_cases": 40,
+  "temporary_quality_databases_dropped": 3,
+  "temporary_workflow_database_dropped": true,
+  "local_enabled": true,
+  "remote_release": false
+}

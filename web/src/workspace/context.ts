@@ -1,10 +1,15 @@
 import { createContext } from 'react';
+import type { CaptureSaveResult } from './captureSync';
+import type { OnboardingSubmission } from './onboardingSync';
 import type { DailyPreferences } from './dailyPreferences.ts';
 import type { CapabilitySettingsInput, CaptureInput, FocusSession, GrowthPlan, Goal, KnowledgeCardContextLinkInput, KnowledgeCardInput, KnowledgeCardSummaryDraft, LearningItem, OnboardingDraft, OnboardingSelection, PrivacyScope, Reflection, Task, TaskStatus, WorkspaceState } from './workspaceData';
 import type { CapabilityBriefGoalPromotionPayload, CapabilityBriefKnowledgePromotionPayload, CapabilityBriefMemoryPromotionPayload, CapabilityBriefPlanPromotionPayload, CapabilityBriefTaskPromotionPayload, CapabilityInvocationPayload } from './dashboardData';
 
 export interface WorkspaceContextValue {
   state: WorkspaceState;
+  hydrationStatus: 'loading' | 'ready' | 'partial' | 'error' | 'empty';
+  retryHydration: () => void;
+  refreshExecutionData: () => Promise<void>;
   activeWorkspace: WorkspaceState['workspaces'][number];
   activeProjects: WorkspaceState['projects'];
   activeGoals: WorkspaceState['goals'];
@@ -23,9 +28,10 @@ export interface WorkspaceContextValue {
   updatePrivacyScope: (enabledSources: PrivacyScope['enabledSources']) => Promise<boolean>;
   setActiveWorkspace: (workspaceId: string) => void;
   addTask: (title: string, options?: Partial<Pick<Task, 'description' | 'priority' | 'dueLabel' | 'projectId' | 'goalId' | 'planId' | 'source'>>) => void;
-  addGoal: (input: Pick<Goal, 'title'> & Partial<Pick<Goal, 'description' | 'dueAt' | 'importance' | 'projectId'>>) => void;
-  addGrowthPlan: (input: Pick<GrowthPlan, 'goalId' | 'title'> & Partial<Pick<GrowthPlan, 'description' | 'projectId' | 'periodType' | 'totalWeeks' | 'milestones'>>) => void;
-  addLearningItem: (input: Pick<LearningItem, 'title'> & Partial<Pick<LearningItem, 'summary' | 'kind' | 'durationMinutes' | 'relatedGoalId' | 'projectId'>>) => void;
+  acceptAgentTask: (task: import('./dashboardData').TaskPayload) => void;
+  addGoal: (input: Pick<Goal, 'title'> & Partial<Pick<Goal, 'description' | 'dueAt' | 'importance' | 'projectId'>> & {requestId?: string}) => Promise<boolean>;
+  addGrowthPlan: (input: Pick<GrowthPlan, 'goalId' | 'title'> & Partial<Pick<GrowthPlan, 'description' | 'projectId' | 'periodType' | 'totalWeeks' | 'milestones'>> & {requestId?: string}) => Promise<boolean>;
+  addLearningItem: (input: Pick<LearningItem, 'title'> & Partial<Pick<LearningItem, 'summary' | 'kind' | 'durationMinutes' | 'relatedGoalId' | 'projectId' | 'sourceUrl'>>) => Promise<boolean>;
   addKnowledgeCard: (input: KnowledgeCardInput) => Promise<boolean>;
   retryKnowledgeCard: (cardId: string) => Promise<boolean>;
   addKnowledgeCardToLearning: (cardId: string) => Promise<boolean>;
@@ -52,8 +58,11 @@ export interface WorkspaceContextValue {
   exitFocus: () => void;
   saveMorning: (input: Pick<Reflection, 'energy' | 'intention'> & { isMakeup?: boolean }) => void;
   saveEvening: (input: Pick<Reflection, 'completion' | 'wins' | 'friction' | 'adjustment' | 'mood'> & { isMakeup?: boolean }) => void;
-  addCapture: (input: string | CaptureInput) => Promise<boolean>;
-  applyOnboarding: (draft: OnboardingDraft, selected: OnboardingSelection, rawInput: string, onlyCapture?: boolean) => void;
+  addCapture: (input: string | CaptureInput) => Promise<CaptureSaveResult>;
+  retryCapture: (captureId: string) => Promise<CaptureSaveResult>;
+  onboardingSubmission: OnboardingSubmission | null;
+  applyOnboarding: (draft: OnboardingDraft, selected: OnboardingSelection, rawInput: string) => Promise<OnboardingSubmission>;
+  retryOnboarding: () => Promise<OnboardingSubmission>;
   skipOnboarding: () => void;
   resetWorkspaceData: () => void;
 }

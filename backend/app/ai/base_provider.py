@@ -3,6 +3,12 @@
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from urllib.parse import urlsplit
+
+
+def chat_completion_path(base_url: str) -> str:
+    """httpx retains base paths: avoid appending a second /v1 to compatible endpoints."""
+    return "/chat/completions" if urlsplit(base_url).path.rstrip("/").endswith("/v1") else "/v1/chat/completions"
 
 
 @dataclass

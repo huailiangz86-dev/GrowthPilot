@@ -23,6 +23,10 @@ dependencies = [
     "akshare>=1.14.0",
     "pypinyin>=0.51.0",
     "tickflow>=0.1.24",
+    "pypdf>=6.19,<7",
+    "alibabacloud-bailian20231229==2.6.2",
+    "python-dotenv>=1.0",
+    "pywebpush>=2.0,<3",
 ]
 
 [project.optional-dependencies]

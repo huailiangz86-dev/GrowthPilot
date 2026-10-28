@@ -1851,6 +1851,12 @@
   font-weight: 700;
 }
 
+.growth-composer fieldset {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
 .growth-composer label > span small {
   color: var(--muted-2);
   font-size: 10px;
@@ -4288,3 +4294,5 @@
     padding: 0 6px;
   }
 }
+
+.task-agent-source { grid-column: 2 / -1; color: #47735b; font-size: 11px; justify-self: start; margin-top: 4px; }

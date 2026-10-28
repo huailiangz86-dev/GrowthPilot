@@ -7,6 +7,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import AppException
 from app.engines.workspace_engine import append_event
 from app.models.workspace import Workspace
 from app.models.workspace_reflection import WorkspaceReflection
@@ -47,13 +48,29 @@ def reflection_key(reflection_type: str, reflection_date: date) -> str | None:
     return f"{reflection_type}:{reflection_date.isoformat()}" if reflection_type in {"morning", "evening"} else None
 
 
+def validate_capture_replay(existing: WorkspaceReflection, values: dict[str, Any]) -> None:
+    immutable_fields = (
+        "content", "micro_type", "micro_status", "project_id", "goal_id", "task_id",
+        "energy", "intention", "completion", "wins", "friction", "adjustment", "mood",
+    )
+    if any(getattr(existing, field) != values.get(field) for field in immutable_fields):
+        raise AppException("CAPTURE_REQUEST_CONFLICT", "同一提交标识不能用于不同记录，请保留原文并创建新记录", 409)
+
+
 async def save_reflection(
     session: AsyncSession,
     *,
     workspace: Workspace,
     values: dict[str, Any],
+    client_request_id: uuid.UUID | None = None,
 ) -> WorkspaceReflection:
-    key = reflection_key(values["reflection_type"], values["reflection_date"])
+    is_retryable_capture = values["reflection_type"] == "micro" and client_request_id is not None
+    key = client_request_id.hex if is_retryable_capture else reflection_key(values["reflection_type"], values["reflection_date"])
+    if is_retryable_capture:
+        # Serialize identical first submissions, including requests from different tabs.
+        await session.execute(select(Workspace.id).where(
+            Workspace.id == workspace.id, Workspace.user_id == workspace.user_id,
+        ).with_for_update())
     existing = None
     if key:
         result = await session.execute(
@@ -64,6 +81,10 @@ async def save_reflection(
             )
         )
         existing = result.scalar_one_or_none()
+    if existing is not None and is_retryable_capture:
+        validate_capture_replay(existing, values)
+        # A lost response can be replayed without rewriting the fact or appending another event.
+        return existing
     if existing is None:
         reflection = WorkspaceReflection(
             id=uuid.uuid4(),

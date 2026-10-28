@@ -1,8 +1,11 @@
 from pydantic import BaseModel, Field
 
 
-class PhoneLoginRequest(BaseModel):
+class SmsCodeRequest(BaseModel):
     phone: str = Field(..., min_length=11, max_length=11, pattern=r"^1[3-9]\d{9}$")
+
+
+class PhoneLoginRequest(SmsCodeRequest):
     code: str = Field(..., min_length=6, max_length=6)
 
 

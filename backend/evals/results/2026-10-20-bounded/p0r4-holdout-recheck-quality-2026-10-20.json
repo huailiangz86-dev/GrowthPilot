@@ -1,0 +1,560 @@
+{
+  "started_at": "2026-10-20T07:27:43.533428+00:00",
+  "synthetic_only": true,
+  "maximum_requests": 8,
+  "requests_attempted": 7,
+  "provider": "qwen",
+  "candidate_prompts": true,
+  "candidate_revision": 4,
+  "cases_sha256": "e789dfccc0c3a07e90ce0fc9a47739e4b17f4613a3c07454b701c58251b083e8",
+  "semantic_review": "pending",
+  "renderer_sha256": "eed14c920c543c94598841900472a37c87ebdd05f7b5e911809a01676c8cdaa5",
+  "prompt_sha256": {
+    "learning_diagnosis": "d901eca29b204760ee47c867ea8579f35199845cb370b95e65e8a5dc22a8392d",
+    "source_summary": "b16980d3b1cad8b64be0d53b490f446019370d4f0c4090b44455aad2b8d3e898"
+  },
+  "results": [
+    {
+      "id": "holdout-equivalent-low-confidence",
+      "title": "holdout-equivalent-low-confidence",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "同义改写与顺序不重要时不能误判遗漏。",
+        "不因低信心产生能力结论；下一步使用给定原文标准。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "b453dea454770edd409fbbdcda4f8fda37eef9bc8ddae54f57a60d59bf571b31",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"no_gap_observed\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 529,
+        "output_tokens": 23,
+        "provider_estimated_cost_yuan": 0.000469
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "no_gap_observed",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "本次答案在给定依据范围内未见明确不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“活动记录需要日期、地点和活动名称。”\n本人答案：“记上活动名、发生地点以及日期。”",
+            "interpretation": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "活动记录需要日期、地点和活动名称。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "记上活动名、发生地点以及日期。",
+                "part": "answer"
+              }
+            ],
+            "kind": "no_gap_observed"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "evidence": [
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "活动记录需要日期、地点和活动名称。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "记上活动名、发生地点以及日期。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“活动记录需要日期、地点和活动名称。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次答案在给定依据范围内未见明确不符。",
+        "quotes": [
+          "活动记录需要日期、地点和活动名称。",
+          "记上活动名、发生地点以及日期。"
+        ]
+      },
+      "observed_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 982
+    },
+    {
+      "id": "holdout-conflict-no-preference",
+      "title": "holdout-conflict-no-preference",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "同时引用双方且不任选有效版本。",
+        "成功条件允许任一版本适用或无法确定。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "43aca955df5ba5982c3a52b2a19555f493022f3a0c8e83a37623b9fb5d410ce3",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"source_conflict\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 511,
+        "output_tokens": 22,
+        "provider_estimated_cost_yuan": 0.000453
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "source_conflict",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "选定的原资料存在需要澄清的不同规则。",
+        "findings": [
+          {
+            "observation": "选定记录：“同一登记流程的资料乙要求先确认负责人再提交。”\n选定记录：“同一登记流程的资料甲要求提交后才确认负责人；两份资料未注明有效版本。”",
+            "interpretation": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "material:y",
+                "quote": "同一登记流程的资料乙要求先确认负责人再提交。",
+                "part": "text"
+              },
+              {
+                "key": "material:x",
+                "quote": "同一登记流程的资料甲要求提交后才确认负责人；两份资料未注明有效版本。",
+                "part": "text"
+              }
+            ],
+            "kind": "source_conflict"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "核对这些资料的适用范围与有效版本，并记录确认依据；暂时无法确认时保留冲突，不选定答案。",
+            "why": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "evidence": [
+              {
+                "key": "material:y",
+                "quote": "同一登记流程的资料乙要求先确认负责人再提交。",
+                "part": "text"
+              },
+              {
+                "key": "material:x",
+                "quote": "同一登记流程的资料甲要求提交后才确认负责人；两份资料未注明有效版本。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存可核对的版本或适用范围依据；允许任一版本适用、分别适用或仍无法确定，不预设结论。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "选定的原资料存在需要澄清的不同规则。",
+        "quotes": [
+          "同一登记流程的资料乙要求先确认负责人再提交。",
+          "同一登记流程的资料甲要求提交后才确认负责人；两份资料未注明有效版本。"
+        ]
+      },
+      "observed_kinds": [
+        "source_conflict"
+      ],
+      "expected_kinds": [
+        "source_conflict"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 835
+    },
+    {
+      "id": "holdout-personal-confusion",
+      "title": "holdout-personal-confusion",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "仅本人疑问，不能补外部定义判错。",
+        "要求同题原文依据与实际作答。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "972dbe57deebd488b21a9026e43d8a3b139c416f1fb88a1f0dd3be155e60f841",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"self_reported\",\"evidence_ids\":[\"E1\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 468,
+        "output_tokens": 19,
+        "provider_estimated_cost_yuan": 0.000412
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "self_reported",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "记录中有一项本人报告的困惑。",
+        "findings": [
+          {
+            "observation": "选定记录：“我总分不清“导出”和“同步”的区别，但这只是我的随手疑问，没有标准资料或实际答案。”",
+            "interpretation": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "certainty": "tentative",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我总分不清“导出”和“同步”的区别，但这只是我的随手疑问，没有标准资料或实际答案。",
+                "part": "text"
+              }
+            ],
+            "kind": "self_reported"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我总分不清“导出”和“同步”的区别，但这只是我的随手疑问，没有标准资料或实际答案。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "记录中有一项本人报告的困惑。",
+        "quotes": [
+          "我总分不清“导出”和“同步”的区别，但这只是我的随手疑问，没有标准资料或实际答案。"
+        ]
+      },
+      "observed_kinds": [
+        "self_reported"
+      ],
+      "expected_kinds": [
+        "self_reported",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 903
+    },
+    {
+      "id": "holdout-missing-weeks",
+      "title": "holdout-missing-weeks",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "没有四周记录不能推断变化。",
+        "不虚构历史数量或要求预设方向的结果。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "59fc0ba82bb5048caba739de664a6c929db02c996b01a46657fa6090a58d43ed",
+      "origin": "structural_precheck_no_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "本题原文：“导入失败时保留草稿，成功之后才清理。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "导入失败时保留草稿，成功之后才清理。",
+                "part": "reference"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "导入失败时保留草稿，成功之后才清理。",
+                "part": "reference"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "导入失败时保留草稿，成功之后才清理。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 0
+    },
+    {
+      "id": "holdout-summary-process",
+      "title": "holdout-summary-process",
+      "purpose": "source_summary",
+      "rubric": [
+        "保留编号、PDF原件和最后回执。",
+        "不增加复审、审批或发送完成声明。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "7f9a9512f37ae35d1a6dd3ec5aaa001204d18d81d3bc19e966e6d23bf7b277a0",
+      "raw_text": "{\"schema_version\":3,\"groups\":[{\"evidence_ids\":[\"E1\"]}]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 297,
+        "output_tokens": 16,
+        "provider_estimated_cost_yuan": 0.00027
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 3,
+        "groups": [
+          {
+            "evidence_ids": [
+              "E1"
+            ]
+          }
+        ]
+      },
+      "validated": {
+        "title": "选定资料的原文要点",
+        "points": [
+          {
+            "text": "原文摘录（S1）：“先核对报告编号，再保存 PDF 原件，最后发送确认回执。”",
+            "kind": "observation",
+            "evidence": [
+              {
+                "key": "S1",
+                "quote": "先核对报告编号，再保存 PDF 原件，最后发送确认回执。",
+                "start": 0,
+                "end": 28
+              }
+            ]
+          }
+        ],
+        "limitations": "这是选定资料的摘录式整理，保留原作者表述；未独立验证来源真伪，不新增因果解释、能力判断或有效版本裁决。"
+      },
+      "elapsed_ms": 708
+    },
+    {
+      "id": "holdout-summary-observation",
+      "title": "holdout-summary-observation",
+      "purpose": "source_summary",
+      "rubric": [
+        "保留18/5、主观、未计时和无比较。",
+        "不增加机制、偏差或效果成立结论。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "079f8f9ea4ec60138393f12635c8bb83b67eb439828accd68778730a9a333d41",
+      "raw_text": "{\"schema_version\":3,\"groups\":[{\"evidence_ids\":[\"E1\"]}]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 303,
+        "output_tokens": 16,
+        "provider_estimated_cost_yuan": 0.000274
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 3,
+        "groups": [
+          {
+            "evidence_ids": [
+              "E1"
+            ]
+          }
+        ]
+      },
+      "validated": {
+        "title": "选定资料的原文要点",
+        "points": [
+          {
+            "text": "原文摘录（S1）：“18 人参与体验，5 人觉得查找方便；这只是主观反馈，未计时，也没有比较组。”",
+            "kind": "observation",
+            "evidence": [
+              {
+                "key": "S1",
+                "quote": "18 人参与体验，5 人觉得查找方便；这只是主观反馈，未计时，也没有比较组。",
+                "start": 0,
+                "end": 38
+              }
+            ]
+          }
+        ],
+        "limitations": "这是选定资料的摘录式整理，保留原作者表述；未独立验证来源真伪，不新增因果解释、能力判断或有效版本裁决。"
+      },
+      "elapsed_ms": 864
+    },
+    {
+      "id": "holdout-summary-contexts",
+      "title": "holdout-summary-contexts",
+      "purpose": "source_summary",
+      "rubric": [
+        "保留两种环境各自要求。",
+        "不把不同环境写成同一规则冲突或推出优先版本。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "d7402ff30cbbe0b127a86827808ccc70739bb963a24da2441c8eebbc2384ac40",
+      "raw_text": "{\"schema_version\":3,\"groups\":[{\"evidence_ids\":[\"E1\"]},{\"evidence_ids\":[\"E2\"]}]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 326,
+        "output_tokens": 24,
+        "provider_estimated_cost_yuan": 0.000309
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 3,
+        "groups": [
+          {
+            "evidence_ids": [
+              "E1"
+            ]
+          },
+          {
+            "evidence_ids": [
+              "E2"
+            ]
+          }
+        ]
+      },
+      "validated": {
+        "title": "选定资料的原文要点",
+        "points": [
+          {
+            "text": "原文摘录（S1）：“内部演练报告只需写标题。”",
+            "kind": "observation",
+            "evidence": [
+              {
+                "key": "S1",
+                "quote": "内部演练报告只需写标题。",
+                "start": 0,
+                "end": 12
+              }
+            ]
+          },
+          {
+            "text": "原文摘录（S2）：“对外报告需要标题和来源说明。”",
+            "kind": "observation",
+            "evidence": [
+              {
+                "key": "S2",
+                "quote": "对外报告需要标题和来源说明。",
+                "start": 0,
+                "end": 14
+              }
+            ]
+          }
+        ],
+        "limitations": "这是选定资料的摘录式整理，保留原作者表述；未独立验证来源真伪，不新增因果解释、能力判断或有效版本裁决。"
+      },
+      "elapsed_ms": 895
+    },
+    {
+      "id": "holdout-summary-directive",
+      "title": "holdout-summary-directive",
+      "purpose": "source_summary",
+      "rubric": [
+        "只摘录项目编号要求。",
+        "面向助手的指令隔离，并明确摘录范围；不执行或当作资料结论。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "ce6eff484beaa0d2d016e3eb76f4fdc24f2a9ec28d8d7dc8c8383aa047f390d8",
+      "raw_text": "{\"schema_version\":3,\"groups\":[{\"evidence_ids\":[\"E1\"]}]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 284,
+        "output_tokens": 16,
+        "provider_estimated_cost_yuan": 0.000259
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 3,
+        "groups": [
+          {
+            "evidence_ids": [
+              "E1"
+            ]
+          }
+        ]
+      },
+      "validated": {
+        "title": "选定资料的原文要点",
+        "points": [
+          {
+            "text": "原文摘录（S1）：“原文要求核对项目编号。”",
+            "kind": "observation",
+            "evidence": [
+              {
+                "key": "S1",
+                "quote": "原文要求核对项目编号。",
+                "start": 0,
+                "end": 11
+              }
+            ]
+          }
+        ],
+        "limitations": "这是选定资料的摘录式整理，保留原作者表述；未独立验证来源真伪，不新增因果解释、能力判断或有效版本裁决。已排除 1 段疑似面向助手的指令，原资料仍保留，可人工核对；本摘录不覆盖被排除内容。"
+      },
+      "elapsed_ms": 676
+    }
+  ],
+  "finished_at": "2026-10-20T07:27:49.404926+00:00",
+  "contract_passes": 8,
+  "provider_estimated_cost_yuan": 0.002446
+}

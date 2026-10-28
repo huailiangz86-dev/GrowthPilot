@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 import httpx
 import structlog
 
-from app.ai.base_provider import BaseLLMProvider, LLMResponse, LLMStreamChunk
+from app.ai.base_provider import BaseLLMProvider, LLMResponse, LLMStreamChunk, chat_completion_path
 from app.core.config import settings
 
 logger = structlog.get_logger()
@@ -41,7 +41,7 @@ class QwenProvider(BaseLLMProvider):
     ) -> LLMResponse:
         async with self._get_client() as client:
             resp = await client.post(
-                "/v1/chat/completions",
+                chat_completion_path(self.base_url),
                 json={
                     "model": model,
                     "messages": messages,
@@ -74,7 +74,7 @@ class QwenProvider(BaseLLMProvider):
         async with self._get_client() as client:
             async with client.stream(
                 "POST",
-                "/v1/chat/completions",
+                chat_completion_path(self.base_url),
                 json={
                     "model": model,
                     "messages": messages,

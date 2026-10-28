@@ -1,19 +1,33 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { api } from '../../api/client';
+import AnalysisView from '../../analysis/AnalysisView';
+import FactRecorder from '../../analysis/FactRecorder';
+import type { AnalysisReport, Period } from '../../analysis/analysisTypes';
+import { captureOwnerId } from '../../workspace/captureSync';
+import { localDateKey } from '../../workspace/dailyPreferences';
 import { useWorkspace } from '../../workspace/useWorkspace';
 import './workspace.css';
 
-export default function Insights() {
-  const { activeInsights, activeTasks, activeProjects, activeActivities, activeCaptures, activeReflections } = useWorkspace();
-  const completedTasks = activeTasks.filter((task) => task.status === 'done').length;
-  const activeTaskCount = activeTasks.filter((task) => task.status !== 'done').length;
-  const linkedCaptures = activeCaptures.filter((capture) => capture.projectId || capture.goalId || capture.taskId).length;
-  const reflectionCount = activeReflections.filter((reflection) => reflection.type !== 'micro').length;
-  const evidence = [
-    `${activeActivities.length} 条 Workspace Event`,
-    `${completedTasks} 个任务完成，${activeTaskCount} 个仍在推进`,
-    `${activeCaptures.length} 条快速记录，其中 ${linkedCaptures} 条已关联工作对象`,
-  ];
-  const dynamicInsight = activeCaptures.length > 0 ? { title: linkedCaptures > 0 ? '你的判断正在回到具体工作里' : '先给这条记录一个工作对象', body: linkedCaptures > 0 ? '最近的快速记录已和任务、目标或项目连接。它们会成为复盘和下一步建议的可追溯证据。' : '你已经开始留下事实。下一次记录时关联一个任务或目标，系统才能把它转成更准确的下一步。', evidence, actionLabel: linkedCaptures > 0 ? '查看工作台活动' : '留下一条关联记录', tone: 'focus' as const } : null;
-  const cards = dynamicInsight ? [dynamicInsight, ...activeInsights] : activeInsights;
-  return <div className="page-stack"><header className="page-intro"><div><span className="section-kicker">GROWTH INSIGHTS</span><h2>看见正在发生的变化</h2><p>洞察来自真实的任务、学习、项目活动和复盘，不要求你额外填写一套成长数据。</p></div><Link to="/app/ai-coach" className="outline-action">和 AI 一起看 →</Link></header><section className="insights-score-band"><div className="insight-score-main"><span className="section-kicker">THIS WEEK</span><strong>{activeCaptures.length > 0 ? '事实正在累积' : '先留下第一条事实'}</strong><p>{activeCaptures.length > 0 ? '任务、记录与复盘已经可以相互解释，系统会据此逐渐收敛建议。' : '完成、卡点、想法和学习都可以从右下角快速记录开始。'}</p></div><div className="insight-score"><strong>{activeActivities.length}</strong><span>工作台事件</span></div><div className="insight-score"><strong>{completedTasks}</strong><span>完成任务</span></div><div className="insight-score"><strong>{activeCaptures.length}</strong><span>成长事实</span></div><div className="insight-score"><strong>{reflectionCount}</strong><span>晨晚复盘</span></div></section><div className="insights-grid"><div className="insight-card-list">{cards.map((insight) => <article className={`workspace-panel full-insight-card tone-insight-${insight.tone}`} key={insight.title}><div className="panel-header"><div><span className="section-kicker">{insight === dynamicInsight ? 'LIVE SIGNAL' : 'AI INSIGHT'}</span><h3>{insight.title}</h3></div><span className="insight-mark">✦</span></div><p>{insight.body}</p><div className="evidence-list">{insight.evidence.map((item) => <span key={item}>✓ {item}</span>)}</div><Link to={insight === dynamicInsight && linkedCaptures === 0 ? '/app/workspace' : '/app/workspace'} className="insight-action">{insight.actionLabel} →</Link></article>)}</div><aside className="insight-side"><section className="workspace-panel"><div className="panel-header"><div><span className="section-kicker">PROJECT MOMENTUM</span><h3>项目推进</h3></div></div>{activeProjects.map((project) => <div className="momentum-row" key={project.id}><div><strong>{project.name}</strong><small>{project.progress}% 完成</small></div><span className="mini-progress"><i style={{ width: `${project.progress}%`, background: project.accent }} /></span></div>)}</section><section className="workspace-panel evidence-panel"><span className="section-kicker">DATA COVERAGE</span><h3>当前样本覆盖</h3><p>{activeCaptures.length === 0 ? '尚未有快速记录。洞察会保守显示，避免基于不足数据下结论。' : `已有 ${activeCaptures.length} 条快速记录、${reflectionCount} 次晨晚复盘和 ${completedTasks} 个完成任务。`}</p><Link to="/app/workspace" className="text-button">查看活动来源 →</Link></section></aside></div></div>;
+function WorkspaceAnalysis({owner,workspace}:{owner:string;workspace:string}){
+  const {activeWorkspace,dailyPreferences,privacyScope}=useWorkspace();const [params,setParams]=useSearchParams();const navigate=useNavigate();
+  const period:Period=['day','week','month'].includes(params.get('period')??'')?params.get('period') as Period:'week';
+  const anchor=/^\d{4}-\d{2}-\d{2}$/.test(params.get('date')??'')?params.get('date')!:localDateKey(dailyPreferences.timezone);
+  const [report,setReport]=useState<AnalysisReport|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState('');const [notice,setNotice]=useState('');const [discussing,setDiscussing]=useState(false);const [revision,setRevision]=useState(0);const alive=useRef(true);const sending=useRef(false);
+  const noticeRef=useRef<HTMLDivElement>(null);
+  useEffect(()=>{if(notice)noticeRef.current?.focus();},[notice]);
+  const current=()=>alive.current&&captureOwnerId(localStorage.getItem('gp_token'))===owner;
+  useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
+  useEffect(()=>{let active=true;setLoading(true);setReport(null);setError('');if(!/^[\da-f-]{36}$/i.test(workspace)||!owner){setLoading(false);setError('请先保存当前工作台，再查看真实统计。');return;}
+    void api.get<AnalysisReport>('/workspace-analysis/report',{workspace_id:workspace,period,anchor}).then(data=>{if(active&&current())setReport(data);}).catch(e=>{if(active&&current())setError(e instanceof Error?e.message:'分析暂时无法读取。');}).finally(()=>{if(active&&current())setLoading(false);});return()=>{active=false;};
+  },[workspace,owner,period,anchor,dailyPreferences.timezone,revision]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function discuss(){
+    if(sending.current||!report)return;const key=`growthpilot.analysis.discuss.v1:${owner}:${workspace}`;let id=crypto.randomUUID();
+    try{let stored;try{stored=JSON.parse(localStorage.getItem(key)??'null');}catch{stored=null;}if(stored?.period===period&&stored?.anchor===anchor&&/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(stored?.id??''))id=stored.id;localStorage.setItem(key,JSON.stringify({id,period,anchor}));}catch{setNotice('浏览器无法保留分析会话，请检查存储后重试。');return;}
+    sending.current=true;setDiscussing(true);setNotice('');
+    try{const result=await api.post<{conversation_id:string}>('/workspace-analysis/discuss',{id,workspace_id:workspace,period,anchor});if(!current())return;try{localStorage.removeItem(key);}catch{/* Existing conversation is still durable. */}navigate(`/app/agent?conversation=${result.conversation_id}`);}
+    catch(e){if(current())setNotice(`${e instanceof Error?e.message:'暂时无法进入对话。'} 时间范围已保留，可以重试。`);}finally{sending.current=false;if(current())setDiscussing(false);}
+  }
+  return <>{notice&&<div role="alert" className="fact-notice" ref={noticeRef} tabIndex={-1}>{notice} <button className="outline-action" disabled={discussing||loading||!report} onClick={()=>void discuss()}>重试进入对话</button></div>}<AnalysisView workspace={activeWorkspace.name} period={period} anchor={anchor} onPeriod={p=>setParams({period:p,date:anchor,...(params.get('feedback')?{feedback:params.get('feedback')!}:{})})} onAnchor={a=>a&&setParams({period,date:a})} report={report} loading={loading} error={error} onRetry={()=>setRevision(r=>r+1)} onDiscuss={()=>void discuss()} discussing={discussing}/><p className="muted-note">进入 Agent 时只携带允许的数据来源：{privacyScope.enabledSources.filter(s=>['tasks','learning','reflections'].includes(s)).map(s=>s==='tasks'?'任务与行动结果':s==='learning'?'实际学习投入':'记录与复盘').join('、')||'尚未开放来源'}。</p><FactRecorder onSaved={()=>setRevision(r=>r+1)}/></>;
 }
+export default function Insights(){const {activeWorkspace}=useWorkspace();const owner=captureOwnerId(localStorage.getItem('gp_token'))??'';return <WorkspaceAnalysis key={`${owner}:${activeWorkspace.id}`} owner={owner} workspace={activeWorkspace.id}/>;}

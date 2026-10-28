@@ -7,7 +7,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8002',
+        target: process.env.GROWTHPILOT_API_TARGET || 'http://localhost:8002',
         changeOrigin: true,
       },
     },

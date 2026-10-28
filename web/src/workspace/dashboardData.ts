@@ -2,6 +2,7 @@ import { localDateKey, shiftLocalDateKey } from './dailyPreferences.ts';
 import type { Activity, Capability, Capture, Goal, GrowthPlan, KnowledgeCard, KnowledgeCardAiStatus, Project, Reflection, Task, WorkspaceState } from './workspaceData';
 
 export interface TaskPayload {
+  agent_source?: {conversation_id: string; turn_id: string} | null;
   id: string;
   workspace_id: string;
   project_id: string | null;
@@ -33,6 +34,7 @@ export interface GoalPayload {
 }
 
 export interface GrowthPlanPayload {
+  execution_enabled?: boolean;
   id: string;
   workspace_id: string;
   goal_id: string;
@@ -49,6 +51,7 @@ export interface GrowthPlanPayload {
 
 export interface ReflectionPayload {
   id: string;
+  client_request_id?: string | null;
   workspace_id: string;
   project_id: string | null;
   goal_id: string | null;
@@ -71,6 +74,7 @@ export interface ReflectionPayload {
 }
 
 export interface LearningItemPayload {
+  source_url?: string | null;
   id: string;
   workspace_id: string;
   project_id: string | null;
@@ -286,7 +290,8 @@ export function mapTaskPayload(item: TaskPayload, timezone = 'Asia/Shanghai'): T
     projectId: item.project_id ?? undefined,
     goalId: item.goal_id ?? undefined,
     planId: item.plan_id ?? undefined,
-    source: 'user',
+    source: item.agent_source ? 'ai' : 'user',
+    agentSource: item.agent_source ? {conversationId: item.agent_source.conversation_id, turnId: item.agent_source.turn_id} : undefined,
     completedDate: item.completed_at?.slice(0, 10),
   };
 }
@@ -298,7 +303,7 @@ export function mapGoalPayload(item: GoalPayload): Goal {
     title: item.title,
     description: item.description,
     progress: item.progress,
-    horizon: goalHorizon(item.due_at),
+    horizon: typeof item.target_metric?.horizon_label === 'string' ? item.target_metric.horizon_label : goalHorizon(item.due_at),
     dueAt: item.due_at ?? undefined,
     importance: item.importance ?? undefined,
     projectId: item.project_id ?? undefined,
@@ -318,12 +323,14 @@ export function mapGrowthPlanPayload(item: GrowthPlanPayload): GrowthPlan {
     milestones: item.milestones,
     projectId: item.project_id ?? undefined,
     periodType: item.period_type,
+    executionEnabled: item.execution_enabled ?? false,
   };
 }
 
 export function mapReflectionPayload(item: ReflectionPayload): Reflection {
   return {
     id: item.id,
+    clientRequestId: item.client_request_id ?? undefined,
     workspaceId: item.workspace_id,
     type: item.reflection_type,
     reflectionDate: item.reflection_date,
@@ -350,6 +357,8 @@ export function captureFromReflectionPayload(item: ReflectionPayload): Capture |
   if (item.reflection_type !== 'micro' || !item.content || !item.micro_type || !item.micro_status) return null;
   return {
     id: item.id,
+    clientRequestId: item.client_request_id ?? undefined,
+    syncState: 'synced',
     workspaceId: item.workspace_id,
     type: item.micro_type,
     status: item.micro_status,
@@ -376,6 +385,7 @@ export function mapLearningItemPayload(item: LearningItemPayload) {
     projectId: item.project_id ?? undefined,
     summary: item.summary,
     progressUpdatedDate: item.progress_updated_at?.slice(0, 10),
+    sourceUrl: item.source_url ?? undefined,
   };
 }
 
@@ -432,19 +442,22 @@ export function mapCapabilityPayload(item: CapabilityPayload): Capability {
   };
 }
 
-export function mergeHydratedItems<T extends { id: string; workspaceId: string }>(
+export function mergeHydratedItems<T extends { id: string; workspaceId: string; clientRequestId?: string }>(
   remoteItems: T[],
   currentItems: T[],
   workspaceId: string,
   localIdPrefix: string,
 ) {
   const remoteIds = new Set(remoteItems.map((item) => item.id));
+  const remoteRequests = new Set(remoteItems.map(item => item.clientRequestId).filter(Boolean));
   const localDrafts = currentItems.filter((item) => (
     item.workspaceId === workspaceId
     && item.id.startsWith(localIdPrefix)
     && !remoteIds.has(item.id)
+    && (!item.clientRequestId || !remoteRequests.has(item.clientRequestId))
   ));
-  return [...remoteItems, ...localDrafts];
+  // Durable capture requests in another space must survive hydration of this space.
+  return [...remoteItems, ...localDrafts, ...currentItems.filter(item => item.workspaceId !== workspaceId && item.clientRequestId)];
 }
 
 export function mergeDashboardState(state: WorkspaceState, payload: DashboardPayload): WorkspaceState {
@@ -493,8 +506,8 @@ export function mergeDashboardState(state: WorkspaceState, payload: DashboardPay
     id: item.id,
     workspaceId: workspace.id,
     type: item.source_type === 'task' ? 'task' : item.source_type === 'goal' ? 'plan' : 'workspace',
-    title: item.event_type,
-    detail: String(item.payload?.title ?? item.payload?.reason ?? '已记录真实 Workspace Event'),
+    title: item.event_type === 'personal_content_saved' ? ({task:'工作正文已保存',learning_item:'学习内容已保存',reflection:'日复盘已保存'}[item.source_type] ?? '内容已保存') : ({schedule_saved:'工作时间已安排',schedule_cancelled:'工作时段已取消',schedule_preferences_saved:'可用时间偏好已保存'}[item.event_type] ?? item.event_type),
+    detail: String(item.payload?.title ?? item.payload?.reason ?? (item.payload?.version ? `保留版本 ${item.payload.version}` : '已记录工作空间活动')),
     timeLabel: item.occurred_at ? item.occurred_at.slice(0, 16).replace('T', ' ') : '刚刚',
     tone: activityTone(item.event_type),
   }));

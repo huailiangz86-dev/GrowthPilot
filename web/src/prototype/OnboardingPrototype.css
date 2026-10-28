@@ -1,0 +1,3 @@
+.onboarding-prototype { --canvas: #f6f5ef; --ink: #213c32; --muted: #6c7971; --line: #dce2d8; --primary: #215947; color: var(--ink); }
+.onboarding-scenario { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0; font-size: 12px; }
+.onboarding-scenario select { max-width: 60%; padding: 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font: inherit; color: var(--ink); }

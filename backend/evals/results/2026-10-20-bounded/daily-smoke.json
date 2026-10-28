@@ -1,0 +1,13 @@
+{
+  "health": true,
+  "formal_schema": true,
+  "login_return": true,
+  "prototype_preserved": true,
+  "viewports": [
+    375,
+    1440
+  ],
+  "errors": [],
+  "model_requests": 0,
+  "business_mutations": 0
+}

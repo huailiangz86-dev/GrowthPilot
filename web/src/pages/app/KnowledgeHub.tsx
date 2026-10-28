@@ -2,7 +2,9 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import type { KnowledgeCard, KnowledgeCardContextLinkInput, KnowledgeCardInput, KnowledgeCardSummaryDraft, LearningItem, Task } from '../../workspace/workspaceData';
 import { useWorkspace } from '../../workspace/useWorkspace';
+import { api } from '../../api/client';
 import './workspace.css';
+import './Execution.css';
 
 type LearningFilter = 'all' | 'in_progress' | 'queued' | 'completed';
 
@@ -19,8 +21,6 @@ export default function KnowledgeHub() {
     confirmKnowledgeCardSummary,
     updateKnowledgeCardContextLinks,
     addLearningItem,
-    addTask,
-    updateLearningProgress,
   } = useWorkspace();
   const [filter, setFilter] = useState<LearningFilter>('all');
   const [showLearningComposer, setShowLearningComposer] = useState(false);
@@ -60,8 +60,8 @@ export default function KnowledgeHub() {
           {current && <div className="learning-overview-meta"><span className="mini-progress"><i style={{ width: `${current.progress}%`, background: 'var(--blue)' }} /></span><strong>{current.progress}%</strong><small>{current.durationLabel}</small></div>}
           {current ? (
             <>
-              <button type="button" className="primary-action" onClick={() => addTask(`学习：${current.title}`, { source: 'user', dueLabel: '今天', goalId: current.relatedGoalId })}>加入今天的行动</button>
-              <button type="button" className="outline-action learning-progress-overview" disabled={current.progress >= 100} onClick={() => updateLearningProgress(current.id, Math.min(100, current.progress + 10))}>{current.progress >= 100 ? '已完成' : '推进 10%'}</button>
+              <Link className="primary-action" to={`/app/learn/${current.id}`}>打开学习内容 ↗</Link>
+              <p className="execution-footnote">页面内的有效学习时间自动保存，进度在提交实际结果后回写。</p>
             </>
           ) : (
             <button type="button" className="primary-action" onClick={() => setShowCaptureComposer(true)}>捕获第一条内容</button>
@@ -113,7 +113,7 @@ export default function KnowledgeHub() {
           </div>
         </div>
         <div className="learning-grid">
-          {items.map((item) => <LearningCard item={item} key={item.id} onAddTask={addTask} onProgress={updateLearningProgress} />)}
+          {items.map((item) => <LearningCard item={item} key={item.id} />)}
           {items.length === 0 && <div className="empty-state"><strong>队列暂时为空</strong><span>从一张知识卡片开始，或直接创建一个学习入口。</span></div>}
         </div>
       </section>
@@ -304,12 +304,8 @@ function splitTerms(value: string) {
 
 function LearningCard({
   item,
-  onAddTask,
-  onProgress,
 }: {
   item: LearningItem;
-  onAddTask: ReturnType<typeof useWorkspace>['addTask'];
-  onProgress: ReturnType<typeof useWorkspace>['updateLearningProgress'];
 }) {
   return (
     <article className="learning-card">
@@ -318,10 +314,11 @@ function LearningCard({
         <span className={`learning-status status-${item.status}`}>{item.status === 'in_progress' ? '进行中' : item.status === 'queued' ? '待学习' : '已完成'}</span>
       </div>
       <h4>{item.title}</h4>
+      <LearningResource item={item} />
       <p>{item.summary || '尚未补充说明。先开始，之后再留下你学到的内容。'}</p>
       <div className="learning-card-foot"><span className="mini-progress"><i style={{ width: `${item.progress}%`, background: 'var(--blue)' }} /></span><small>{item.progress}% · {item.durationLabel}</small></div>
-      <button type="button" className="text-button learning-card-action" disabled={item.progress >= 100} onClick={() => onProgress(item.id, Math.min(100, item.progress + 10))}>{item.progress >= 100 ? '已完成' : '推进 10%'}</button>
-      <button type="button" className="text-button learning-card-action learning-task-action" onClick={() => onAddTask(`学习：${item.title}`, { source: 'user', dueLabel: '待安排', goalId: item.relatedGoalId })}>加入待办 →</button>
+      <Link className="text-button learning-card-action" to={`/app/learn/${item.id}`}>打开学习内容 ↗</Link>
+      <small className="execution-footnote">有原始资源后，后台会自动安排学习行动。</small>
     </article>
   );
 }
@@ -387,19 +384,39 @@ function LearningComposer({ goals, onCancel, onCreate }: { goals: ReturnType<typ
   const [kind, setKind] = useState<LearningItem['kind']>('note');
   const [goalId, setGoalId] = useState('');
   const [durationMinutes, setDurationMinutes] = useState('');
+  const [sourceUrl, setSourceUrl] = useState('');
+  const [saving,setSaving] = useState(false), [error,setError] = useState('');
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!title.trim()) return;
-    onCreate({
+    setSaving(true);setError('');
+    void onCreate({
       title,
       summary,
       kind,
+      sourceUrl,
       relatedGoalId: goalId || undefined,
       durationMinutes: durationMinutes ? Math.max(1, Math.min(10080, Number(durationMinutes) || 1)) : undefined,
-    });
-    onCancel();
+    }).then(ok => {if(ok) onCancel();else setError('学习内容尚未同步到后台，草稿已保留。');}).finally(() => setSaving(false));
   };
 
-  return <section className="workspace-panel growth-composer"><div className="panel-header"><div><span className="section-kicker">NEW LEARNING ITEM</span><h3>确认一个要继续理解的入口</h3></div></div><form onSubmit={handleSubmit}><div className="growth-composer-grid"><label><span>类型</span><select value={kind} onChange={(event) => setKind(event.target.value as LearningItem['kind'])}><option value="note">笔记</option><option value="article">文章</option><option value="course">课程</option><option value="book">书籍</option></select></label><label><span>关联目标 <small>可跳过</small></span><select value={goalId} onChange={(event) => setGoalId(event.target.value)}><option value="">暂不关联</option>{goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.title}</option>)}</select></label><label><span>预计分钟 <small>可跳过</small></span><input type="number" min="1" max="10080" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} /></label></div><label><span>学习标题</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="例如：读完一章关于用户研究的方法" maxLength={240} /></label><label><span>为什么要学 <small>可跳过</small></span><textarea value={summary} onChange={(event) => setSummary(event.target.value)} placeholder="它想帮助你推进什么？" maxLength={1200} /></label><div className="growth-composer-footer"><button type="button" className="text-button" onClick={onCancel}>取消</button><button type="submit" className="primary-action" disabled={!title.trim()}>加入学习队列</button></div></form></section>;
+  return <section className="workspace-panel growth-composer"><div className="panel-header"><div><span className="section-kicker">NEW LEARNING ITEM</span><h3>确认一个要继续理解的入口</h3></div></div><form onSubmit={handleSubmit}><div className="growth-composer-grid"><label><span>类型</span><select value={kind} onChange={(event) => setKind(event.target.value as LearningItem['kind'])}><option value="note">笔记</option><option value="article">文章</option><option value="course">课程</option><option value="book">书籍</option></select></label><label><span>关联目标 <small>可跳过</small></span><select value={goalId} onChange={(event) => setGoalId(event.target.value)}><option value="">暂不关联</option>{goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.title}</option>)}</select></label><label><span>预计分钟 <small>可跳过</small></span><input type="number" min="1" max="10080" value={durationMinutes} onChange={(event) => setDurationMinutes(event.target.value)} /></label></div><label><span>学习标题</span><input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} placeholder="例如：读完一章关于用户研究的方法" maxLength={240} /></label><label><span>原始学习资源地址</span><input type="url" value={sourceUrl} onChange={event => setSourceUrl(event.target.value)} placeholder="https://…" maxLength={2000}/></label><label><span>为什么要学 <small>可跳过</small></span><textarea value={summary} onChange={(event) => setSummary(event.target.value)} placeholder="它想帮助你推进什么？" maxLength={1200} /></label>{error && <p role="alert" className="execution-error">{error}</p>}<div className="growth-composer-footer"><button type="button" className="text-button" onClick={onCancel}>取消</button><button type="submit" className="primary-action" disabled={saving || !title.trim()}>{saving ? '保存中…' : '加入学习队列'}</button></div></form></section>;
+}
+
+function LearningResource({item}: {item: LearningItem}) {
+  const {refreshExecutionData} = useWorkspace();
+  const [editing,setEditing] = useState(false), [source,setSource] = useState(item.sourceUrl ?? '');
+  const [error,setError] = useState(''), [saving,setSaving] = useState(false);
+  const save = async (event: FormEvent) => {
+    event.preventDefault();setSaving(true);setError('');
+    try {await api.patch(`/learning-items/${item.id}/source`, {source_url: source});await refreshExecutionData();setEditing(false);}
+    catch(error) {setError(error instanceof Error ? error.message : '保存资源失败');}
+    finally {setSaving(false);}
+  };
+  return <div>{item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl) && <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-button">打开原始资源 ↗</a>}
+    <button type="button" className="text-button" disabled={item.id.startsWith('learning-')} onClick={()=>setEditing(value=>!value)}>{item.sourceUrl ? '修改资源' : '补充学习资源'}</button>
+    {editing && <form onSubmit={event=>{void save(event);}} className="calendar-url"><input type="url" aria-label="学习资源地址" required value={source} onChange={event=>setSource(event.target.value)} maxLength={2000} placeholder="https://…"/><button className="outline-action" disabled={saving}>{saving?'保存中…':'保存地址'}</button></form>}
+    {error && <p role="alert" className="execution-error">{error}</p>}
+  </div>;
 }

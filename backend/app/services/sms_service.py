@@ -3,9 +3,9 @@
 复用自 ViralForge 项目，适配 GrowthPilot 的 config 结构。
 """
 
+import asyncio
 import json
-import random
-import string
+import secrets
 
 import structlog
 
@@ -29,62 +29,61 @@ def _attempt_key(phone: str) -> str:
     return f"sms:attempt:{phone}"
 
 def _generate_code() -> str:
-    return "".join(random.choices(string.digits, k=6))
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def sms_configured() -> bool:
+    return all((settings.ALIBABA_SMS_ACCESS_KEY_ID, settings.ALIBABA_SMS_ACCESS_KEY_SECRET,
+                settings.ALIBABA_SMS_SIGN_NAME, settings.ALIBABA_SMS_TEMPLATE_CODE))
 
 
 async def send_code(phone: str) -> dict:
-    """发送验证码。返回 {"success": True/False, "message": "..."}"""
-    redis = await get_redis()
-    if not redis:
-        return {"success": False, "message": "服务暂不可用"}
-
-    # 频率限制
-    if await redis.exists(_rate_key(phone)):
-        ttl = await redis.ttl(_rate_key(phone))
-        return {"success": False, "message": f"发送太频繁，请 {ttl} 秒后重试"}
-
-    code = _generate_code()
-
-    # 存 Redis
-    await redis.set(_redis_key(phone), code, ex=CODE_TTL)
-    await redis.set(_rate_key(phone), "1", ex=SEND_INTERVAL)
-    await redis.delete(_attempt_key(phone))
-
-    # 发送短信
-    if settings.ALIBABA_SMS_ACCESS_KEY_ID:
-        ok = await _send_alibaba_sms(phone, code)
-        if not ok:
+    if not sms_configured():
+        return {"success": False, "message": "短信登录尚未配置，请使用其他登录方式"}
+    try:
+        redis = await get_redis()
+        if redis is None:
+            raise RuntimeError("state storage unavailable")
+        # One atomic reservation also prevents concurrent sends bypassing the
+        # cooldown while the provider request is still in progress.
+        reserved = await redis.set(_rate_key(phone), "1", ex=SEND_INTERVAL, nx=True)
+        if not reserved:
+            ttl = max(1, await redis.ttl(_rate_key(phone)))
+            return {"success": False, "message": f"发送太频繁，请 {ttl} 秒后重试"}
+        code = _generate_code()
+        await redis.set(_redis_key(phone), code, ex=CODE_TTL)
+        await redis.delete(_attempt_key(phone))
+        if not await _send_alibaba_sms(phone, code):
+            await redis.delete(_redis_key(phone))
             return {"success": False, "message": "短信发送失败，请稍后重试"}
-    else:
-        logger.info("sms_dev_fallback", phone=phone, code=code)
-
-    return {"success": True}
+        return {"success": True}
+    except Exception:
+        logger.warning("sms_state_unavailable")
+        return {"success": False, "message": "短信服务暂不可用，请稍后重试"}
 
 
 async def verify_code(phone: str, code: str) -> bool:
-    """验证验证码。成功返回 True 并清除。"""
-    redis = await get_redis()
-    if not redis:
+    if not sms_configured() or len(code) != 6 or not code.isdigit():
         return False
-
-    attempts = int(await redis.get(_attempt_key(phone)) or 0)
-    if attempts >= MAX_VERIFY_ATTEMPTS:
+    try:
+        redis = await get_redis()
+        if redis is None:
+            return False
+        # Attempts, comparison and consumption are one operation: concurrent
+        # correct submissions cannot both consume the same SMS credential.
+        result = await redis.eval(
+            "local stored=redis.call('GET',KEYS[1]); "
+            "if not stored then return 0 end; "
+            "local attempts=tonumber(redis.call('GET',KEYS[2]) or '0'); "
+            "if attempts >= tonumber(ARGV[2]) then return 0 end; "
+            "redis.call('INCR',KEYS[2]); redis.call('EXPIRE',KEYS[2],ARGV[3]); "
+            "if stored == ARGV[1] then redis.call('DEL',KEYS[1],KEYS[2]); return 1 end; return 0",
+            2, _redis_key(phone), _attempt_key(phone), code, MAX_VERIFY_ATTEMPTS, CODE_TTL,
+        )
+        return result == 1
+    except Exception:
+        logger.warning("sms_verification_unavailable")
         return False
-
-    stored = await redis.get(_redis_key(phone))
-    if stored is None:
-        return False
-    if isinstance(stored, bytes):
-        stored = stored.decode()
-
-    await redis.incr(_attempt_key(phone))
-    await redis.expire(_attempt_key(phone), CODE_TTL)
-
-    if stored == code:
-        await redis.delete(_redis_key(phone))
-        await redis.delete(_attempt_key(phone))
-        return True
-    return False
 
 
 async def _send_alibaba_sms(phone: str, code: str) -> bool:
@@ -106,13 +105,13 @@ async def _send_alibaba_sms(phone: str, code: str) -> bool:
             template_code=settings.ALIBABA_SMS_TEMPLATE_CODE,
             template_param=json.dumps({"code": code}),
         )
-        response = client.send_sms(request)
+        response = await asyncio.to_thread(client.send_sms, request)
         if response.body.code == "OK":
-            logger.info("sms_sent", phone=phone)
+            logger.info("sms_sent")
             return True
         else:
-            logger.error("sms_failed", phone=phone, code=response.body.code, msg=response.body.message)
+            logger.warning("sms_provider_rejected")
             return False
     except Exception:
-        logger.exception("sms_exception", phone=phone)
+        logger.warning("sms_provider_unavailable")
         return False

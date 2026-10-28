@@ -1,0 +1,27 @@
+.fe-workspace {display:grid;gap:24px;min-width:0}
+.fe-profile-fields {display:grid;gap:16px;min-width:0;border:0;padding:16px 0}
+.fe-profile-fields label {display:grid;gap:6px;min-width:0}
+.fe-profile-fields label.hp-checkbox,.fe-profile-fields .lf-days label {display:flex;align-items:center;gap:8px}
+.fe-profile-fields input,.fe-profile-fields select,.fe-profile-fields textarea {width:100%;min-width:0}
+.fe-profile-fields input[type=checkbox] {width:auto}
+.fe-profile details>summary {cursor:pointer;font-weight:600}
+.fe-context-mode {font-size:12px;color:#37664d}
+.fe-profile-summary {display:grid;gap:6px;min-width:0;font-size:13px;line-height:1.7}
+.fe-profile-summary dt {font-weight:600;margin-top:10px}
+.fe-profile-summary dd {margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.fe-intro h2 {font-size:28px;margin:12px 0}.fe-intro>p {max-width:70ch}
+.fe-intro .hp-form-grid {max-width:600px;margin:20px 0}
+.fe-grid {display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:24px;align-items:start}
+.fe-reviews,.fe-sidebar {display:grid;gap:20px;min-width:0}
+.fe-review h3 {font-size:18px}.fe-observation {padding:14px 0;border-bottom:1px solid #e3e9e3}
+.fe-review p,.fe-plans p,.fe-rule p {white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+.fe-citations {display:flex;flex-wrap:wrap;gap:4px 14px}.fe-citations button {font-size:12px;text-align:left}
+.fe-review details>button {display:block;text-align:left;font-size:13px}
+.fe-suggestion {background:#f0f5ee;border-radius:12px;padding:18px;margin-top:20px}.fe-suggestion h4 {font-size:19px;margin:10px 0}
+.fe-scope,.fe-pending {background:#f6f2e9;padding:12px;border-radius:10px}.fe-pending button {margin-right:10px}
+.fe-plans article {padding:16px 0;border-top:1px solid #e3e9e3}.fe-plans h4 {margin:8px 0}.fe-plans strong {font-size:13px;color:#37664d}
+.fe-rule form,.fe-dialog form {display:grid;gap:14px}.fe-rule label,.fe-dialog label {display:grid;gap:6px}
+.fe-rule label.hp-checkbox,.fe-dialog label.hp-checkbox {display:flex;align-items:center}
+.fe-rule input,.fe-rule select,.fe-dialog input,.fe-dialog textarea {width:100%;min-width:0}.fe-rule input[type=checkbox],.fe-dialog input[type=checkbox] {width:auto}
+.fe-dialog pre,.fe-workspace pre {white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+@media(max-width:800px){.fe-grid{grid-template-columns:minmax(0,1fr)}.fe-intro h2{font-size:24px}.fe-review .hp-section-heading{align-items:flex-start;flex-direction:column}.fe-suggestion{padding:14px}.fe-workspace .hp-form-grid{grid-template-columns:1fr}.fe-plans .lf-actions{align-items:stretch;flex-direction:column}}

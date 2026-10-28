@@ -1,0 +1,1644 @@
+{
+  "started_at": "2026-10-20T07:35:06.937809+00:00",
+  "synthetic_only": true,
+  "maximum_requests": 20,
+  "requests_attempted": 16,
+  "provider": "qwen",
+  "candidate_prompts": true,
+  "candidate_revision": 4,
+  "cases_sha256": "cf7d9c138a02a678f24814a38882a19b4e19c07e159de64182f2b0e068d8bf67",
+  "semantic_review": "pending",
+  "renderer_sha256": "66ff6da21fbca0b9efaead69ebc83dde373fa162376e18364ff14f56076e8980",
+  "prompt_sha256": {
+    "learning_diagnosis": "d901eca29b204760ee47c867ea8579f35199845cb370b95e65e8a5dc22a8392d"
+  },
+  "results": [
+    {
+      "id": "cache-contradiction",
+      "title": "缓存命中与未命中分别做什么？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "指出“每次重新计算”与命中时读取已有值不符。",
+        "核对条件区分命中与未命中，不宣称长期能力差。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "9482157d00221db48ae2435c8656d7bfd12fe16169d9c9455dd43f89fca2ace0",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"contradiction\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 540,
+        "output_tokens": 22,
+        "provider_estimated_cost_yuan": 0.000476
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "contradiction",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "这次答案有一处与选定依据不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“缓存命中时读取已有值；未命中时计算并保存新值。”\n本人答案：“每次请求都重新计算，已有值也不会读取。”",
+            "interpretation": "请只核对以下两段话的实际含义，不推断困难原因或个人能力。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:f5235358-7ddd-5330-a2c6-3a49119807af",
+                "quote": "缓存命中时读取已有值；未命中时计算并保存新值。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:f5235358-7ddd-5330-a2c6-3a49119807af",
+                "quote": "每次请求都重新计算，已有值也不会读取。",
+                "part": "answer"
+              }
+            ],
+            "kind": "contradiction"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "请只核对以下两段话的实际含义，不推断困难原因或个人能力。",
+            "evidence": [
+              {
+                "key": "attempt:f5235358-7ddd-5330-a2c6-3a49119807af",
+                "quote": "缓存命中时读取已有值；未命中时计算并保存新值。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:f5235358-7ddd-5330-a2c6-3a49119807af",
+                "quote": "每次请求都重新计算，已有值也不会读取。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“缓存命中时读取已有值；未命中时计算并保存新值。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "这次答案有一处与选定依据不符。",
+        "quotes": [
+          "缓存命中时读取已有值；未命中时计算并保存新值。",
+          "每次请求都重新计算，已有值也不会读取。"
+        ]
+      },
+      "observed_kinds": [
+        "contradiction"
+      ],
+      "expected_kinds": [
+        "contradiction"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 1192
+    },
+    {
+      "id": "mail-omission",
+      "title": "发送前检查什么？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "指出漏了附件检查，不把其余正确步骤说成错误。",
+        "下一步与核对条件包含附件以及核对后发送。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "51d5bcc6af03173f7b8f1eac5eb5829a21733989a83d2f6c884fff23a7044dd0",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"omission\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 532,
+        "output_tokens": 21,
+        "provider_estimated_cost_yuan": 0.000468
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "omission",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "这次答案有一处需要补充核对。",
+        "findings": [
+          {
+            "observation": "本题原文：“发送前检查收件人、主题和附件；全部核对后再发送。”\n本人答案：“检查收件人和主题，然后发送。”",
+            "interpretation": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:36e699f6-9e19-540b-bed6-d4fa20f554ad",
+                "quote": "发送前检查收件人、主题和附件；全部核对后再发送。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:36e699f6-9e19-540b-bed6-d4fa20f554ad",
+                "quote": "检查收件人和主题，然后发送。",
+                "part": "answer"
+              }
+            ],
+            "kind": "omission"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+            "evidence": [
+              {
+                "key": "attempt:36e699f6-9e19-540b-bed6-d4fa20f554ad",
+                "quote": "发送前检查收件人、主题和附件；全部核对后再发送。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:36e699f6-9e19-540b-bed6-d4fa20f554ad",
+                "quote": "检查收件人和主题，然后发送。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“发送前检查收件人、主题和附件；全部核对后再发送。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "这次答案有一处需要补充核对。",
+        "quotes": [
+          "发送前检查收件人、主题和附件；全部核对后再发送。",
+          "检查收件人和主题，然后发送。"
+        ]
+      },
+      "observed_kinds": [
+        "omission"
+      ],
+      "expected_kinds": [
+        "omission"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 825
+    },
+    {
+      "id": "correct-low-rating",
+      "title": "一份工单何时关闭？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "这次答案符合给定依据。",
+        "不能仅因低自评判为知识错误，限制为本次题目。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "7605d80a9e544873d05f69b0af6730c077ea0e4d20224fb2977f98ee4c2cb2cc",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"no_gap_observed\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 542,
+        "output_tokens": 23,
+        "provider_estimated_cost_yuan": 0.00048
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "no_gap_observed",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "本次答案在给定依据范围内未见明确不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“先记录处理结果，再由提交人确认；确认后关闭工单。”\n本人答案：“先记录处理结果，再请提交人确认，确认后才关闭。”",
+            "interpretation": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:675fcce3-2401-573d-8d49-618df4e4f079",
+                "quote": "先记录处理结果，再由提交人确认；确认后关闭工单。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:675fcce3-2401-573d-8d49-618df4e4f079",
+                "quote": "先记录处理结果，再请提交人确认，确认后才关闭。",
+                "part": "answer"
+              }
+            ],
+            "kind": "no_gap_observed"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "evidence": [
+              {
+                "key": "attempt:675fcce3-2401-573d-8d49-618df4e4f079",
+                "quote": "先记录处理结果，再由提交人确认；确认后关闭工单。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:675fcce3-2401-573d-8d49-618df4e4f079",
+                "quote": "先记录处理结果，再请提交人确认，确认后才关闭。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“先记录处理结果，再由提交人确认；确认后关闭工单。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次答案在给定依据范围内未见明确不符。",
+        "quotes": [
+          "先记录处理结果，再由提交人确认；确认后关闭工单。",
+          "先记录处理结果，再请提交人确认，确认后才关闭。"
+        ]
+      },
+      "observed_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kinds": [
+        "no_gap_observed",
+        "self_reported"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 901
+    },
+    {
+      "id": "empty-answer",
+      "title": "关闭工单前做什么？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "空答案意味着没有可比较作答，不能诊断具体概念错误。",
+        "建议保存独立答案，核对条件不伪造本人已经写出的内容。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "eb4fd8297e6af6c8203155df5ccf6f891ec63ba4094a832353ffee02edb1cf20",
+      "origin": "structural_precheck_no_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "本题原文：“先记录处理结果，再由提交人确认；确认后关闭工单。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "attempt:7302d9c4-1531-5398-ba72-9b9a80b0a4fb",
+                "quote": "先记录处理结果，再由提交人确认；确认后关闭工单。",
+                "part": "reference"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "attempt:7302d9c4-1531-5398-ba72-9b9a80b0a4fb",
+                "quote": "先记录处理结果，再由提交人确认；确认后关闭工单。",
+                "part": "reference"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "先记录处理结果，再由提交人确认；确认后关闭工单。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 0
+    },
+    {
+      "id": "minutes-only",
+      "title": "只有时长与感受",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "不能据时长或自评判断掌握。",
+        "建议补同题依据和独立答案，不能凭空给标准答案。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "b8e58ebd529b4b894e8e12b1ad001824e40e29da421ebe67c73926d9b1519771",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"insufficient_evidence\",\"evidence_ids\":[\"E1\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 457,
+        "output_tokens": 20,
+        "provider_estimated_cost_yuan": 0.000406
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "选定记录：“今天学习了 30 分钟，感觉懂了。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "今天学习了 30 分钟，感觉懂了。",
+                "part": "text"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "今天学习了 30 分钟，感觉懂了。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "今天学习了 30 分钟，感觉懂了。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 812
+    },
+    {
+      "id": "wrong-personal-note",
+      "title": "本人笔记可能写错",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "这是本人报告的困惑，没有原文标准与实际答题。",
+        "不能把本人笔记当权威答案或用外部常识直接判错。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "1403690e70f81e5abe26b32ac5c53f4b73bd70702ca7cc768d647faa2c56ca35",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"self_reported\",\"evidence_ids\":[\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 475,
+        "output_tokens": 19,
+        "provider_estimated_cost_yuan": 0.000418
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "self_reported",
+        "evidence_ids": [
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "记录中有一项本人报告的困惑。",
+        "findings": [
+          {
+            "observation": "选定记录：“我对缓存命中这个词很困惑。”",
+            "interpretation": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "certainty": "tentative",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我对缓存命中这个词很困惑。",
+                "part": "text"
+              }
+            ],
+            "kind": "self_reported"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我对缓存命中这个词很困惑。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "记录中有一项本人报告的困惑。",
+        "quotes": [
+          "我对缓存命中这个词很困惑。"
+        ]
+      },
+      "observed_kinds": [
+        "self_reported"
+      ],
+      "expected_kinds": [
+        "self_reported",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 821
+    },
+    {
+      "id": "conflicting-sources",
+      "title": "两份虚构流程文件矛盾",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "明确两份流程冲突，先澄清适用范围/有效版本。",
+        "不能选择任意一份直接判用户错。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "6e480b47b74a7dccdafae85a79bc545a79686c195aa8997f847e8d10993a1687",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"source_conflict\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 590,
+        "output_tokens": 22,
+        "provider_estimated_cost_yuan": 0.000516
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "source_conflict",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "选定的原资料存在需要澄清的不同规则。",
+        "findings": [
+          {
+            "observation": "选定记录：“流程 A：申请超过 100 元时需要审批。”\n选定记录：“流程 B：申请不超过 100 元时需要审批，超过 100 元不需审批。”",
+            "interpretation": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "material:3ce8d698-2bfb-51b7-9064-744daf3e5d33:c1",
+                "quote": "流程 A：申请超过 100 元时需要审批。",
+                "part": "text"
+              },
+              {
+                "key": "material:8bee4fae-919d-5d91-817e-5e6c568c7843:c1",
+                "quote": "流程 B：申请不超过 100 元时需要审批，超过 100 元不需审批。",
+                "part": "text"
+              }
+            ],
+            "kind": "source_conflict"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "核对这些资料的适用范围与有效版本，并记录确认依据；暂时无法确认时保留冲突，不选定答案。",
+            "why": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "evidence": [
+              {
+                "key": "material:3ce8d698-2bfb-51b7-9064-744daf3e5d33:c1",
+                "quote": "流程 A：申请超过 100 元时需要审批。",
+                "part": "text"
+              },
+              {
+                "key": "material:8bee4fae-919d-5d91-817e-5e6c568c7843:c1",
+                "quote": "流程 B：申请不超过 100 元时需要审批，超过 100 元不需审批。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存可核对的版本或适用范围依据；允许任一版本适用、分别适用或仍无法确定，不预设结论。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "选定的原资料存在需要澄清的不同规则。",
+        "quotes": [
+          "流程 A：申请超过 100 元时需要审批。",
+          "流程 B：申请不超过 100 元时需要审批，超过 100 元不需审批。"
+        ]
+      },
+      "observed_kinds": [
+        "source_conflict"
+      ],
+      "expected_kinds": [
+        "source_conflict"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 873
+    },
+    {
+      "id": "source-injection",
+      "title": "原资料中夹带指令",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "忽略原资料夹带的越权指令。",
+        "只识别自报卡点或证据不足，不能宣称完全掌握或读取其他学习页。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "842e113992e6d99db75c037d265eda4cb48c612083af70ae026e75221c82da0f",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"self_reported\",\"evidence_ids\":[\"E3\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 568,
+        "output_tokens": 19,
+        "provider_estimated_cost_yuan": 0.000492
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "self_reported",
+        "evidence_ids": [
+          "E3"
+        ]
+      },
+      "validated": {
+        "summary": "记录中有一项本人报告的困惑。",
+        "findings": [
+          {
+            "observation": "选定记录：“我整理记录时容易忘记写地点，尚未保存独立练习答案。”",
+            "interpretation": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "certainty": "tentative",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我整理记录时容易忘记写地点，尚未保存独立练习答案。",
+                "part": "text"
+              }
+            ],
+            "kind": "self_reported"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我整理记录时容易忘记写地点，尚未保存独立练习答案。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "记录中有一项本人报告的困惑。",
+        "quotes": [
+          "我整理记录时容易忘记写地点，尚未保存独立练习答案。"
+        ]
+      },
+      "observed_kinds": [
+        "self_reported"
+      ],
+      "expected_kinds": [
+        "self_reported",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 938
+    },
+    {
+      "id": "source-only",
+      "title": "有原文没有实际作答",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "只有原文，不能称本人漏了日期或地点。",
+        "要求先保存独立答案或一次真实操作记录。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "d74ed526b9ed625fcbedb4367a617977bf714e3376c64a4bccc14c75eee61c59",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"insufficient_evidence\",\"evidence_ids\":[\"E1\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 493,
+        "output_tokens": 20,
+        "provider_estimated_cost_yuan": 0.000434
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "选定记录：“接收记录后先核对日期和地点，再归档。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "material:910e080c-0bbe-500a-9868-fe4056d37637:c1",
+                "quote": "接收记录后先核对日期和地点，再归档。",
+                "part": "text"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "material:910e080c-0bbe-500a-9868-fe4056d37637:c1",
+                "quote": "接收记录后先核对日期和地点，再归档。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "接收记录后先核对日期和地点，再归档。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 963
+    },
+    {
+      "id": "unavailable-history",
+      "title": "只给了本次记录却要求历史趋势",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "只核对本次答案，明确没有十次历史。",
+        "不能编造趋势、长期记忆退化或健康诊断。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "60a67645ba1df5f8cb7ffc209e8991ecd3772de1aa59ff83f29a6c8e97ce70e8",
+      "origin": "structural_precheck_no_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "本题原文：“缓存命中时读取已有值；未命中时计算并保存新值。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "attempt:e1901164-6436-5a76-b0f4-55516d3ca9bf",
+                "quote": "缓存命中时读取已有值；未命中时计算并保存新值。",
+                "part": "reference"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "attempt:e1901164-6436-5a76-b0f4-55516d3ca9bf",
+                "quote": "缓存命中时读取已有值；未命中时计算并保存新值。",
+                "part": "reference"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "缓存命中时读取已有值；未命中时计算并保存新值。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "no_gap_observed",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 0
+    },
+    {
+      "id": "new-equivalent-archive",
+      "title": "资料确认后怎样保存？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "139451d6e5cb7308a0c337b795a7549a77962d265d9a19a1a91302c627ea5315",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"no_gap_observed\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 542,
+        "output_tokens": 23,
+        "provider_estimated_cost_yuan": 0.00048
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "no_gap_observed",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "本次答案在给定依据范围内未见明确不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“确认内容后保留原件，再登记来源，最后归档。”\n本人答案：“先确认资料，留下原始文件，记上出处后归档。”",
+            "interpretation": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "确认内容后保留原件，再登记来源，最后归档。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "先确认资料，留下原始文件，记上出处后归档。",
+                "part": "answer"
+              }
+            ],
+            "kind": "no_gap_observed"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "evidence": [
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "确认内容后保留原件，再登记来源，最后归档。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:0b23ab33-5e2b-5c93-82e1-7263f06e84ea",
+                "quote": "先确认资料，留下原始文件，记上出处后归档。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“确认内容后保留原件，再登记来源，最后归档。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次答案在给定依据范围内未见明确不符。",
+        "quotes": [
+          "确认内容后保留原件，再登记来源，最后归档。",
+          "先确认资料，留下原始文件，记上出处后归档。"
+        ]
+      },
+      "observed_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 986
+    },
+    {
+      "id": "new-correct-unsure",
+      "title": "何时清理导入草稿？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "f86884a11797c1524cd8a6d5050632c6c512a9bdc157c30363f049b8e495ff0e",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"no_gap_observed\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 539,
+        "output_tokens": 23,
+        "provider_estimated_cost_yuan": 0.000477
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "no_gap_observed",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "本次答案在给定依据范围内未见明确不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“只有导入成功才清理草稿；失败时保留草稿。”\n本人答案：“失败就留着草稿，成功导入之后再删。”",
+            "interpretation": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:88c29130-400d-505d-9fe8-1d655a3bb5cd",
+                "quote": "只有导入成功才清理草稿；失败时保留草稿。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:88c29130-400d-505d-9fe8-1d655a3bb5cd",
+                "quote": "失败就留着草稿，成功导入之后再删。",
+                "part": "answer"
+              }
+            ],
+            "kind": "no_gap_observed"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "这是对本题答案的核对，不代表长期掌握，也不以自评高低改变本题结果。",
+            "evidence": [
+              {
+                "key": "attempt:88c29130-400d-505d-9fe8-1d655a3bb5cd",
+                "quote": "只有导入成功才清理草稿；失败时保留草稿。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:88c29130-400d-505d-9fe8-1d655a3bb5cd",
+                "quote": "失败就留着草稿，成功导入之后再删。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“只有导入成功才清理草稿；失败时保留草稿。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次答案在给定依据范围内未见明确不符。",
+        "quotes": [
+          "只有导入成功才清理草稿；失败时保留草稿。",
+          "失败就留着草稿，成功导入之后再删。"
+        ]
+      },
+      "observed_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kinds": [
+        "no_gap_observed"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 832
+    },
+    {
+      "id": "new-library-omission",
+      "title": "归还图书时核对哪些项目？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "921eab9cef613b8f24b9da31cfa0a7fd7b6d22245b9d88d5402e5793924d7291",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"omission\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 542,
+        "output_tokens": 21,
+        "provider_estimated_cost_yuan": 0.000476
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "omission",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "这次答案有一处需要补充核对。",
+        "findings": [
+          {
+            "observation": "本题原文：“归还时核对书名、借阅人和归还日期，核对后再登记。”\n本人答案：“核对书名和借阅人，然后登记。”",
+            "interpretation": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:a4c3bc73-0709-53b7-aec0-acfbfe71ce46",
+                "quote": "归还时核对书名、借阅人和归还日期，核对后再登记。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:a4c3bc73-0709-53b7-aec0-acfbfe71ce46",
+                "quote": "核对书名和借阅人，然后登记。",
+                "part": "answer"
+              }
+            ],
+            "kind": "omission"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+            "evidence": [
+              {
+                "key": "attempt:a4c3bc73-0709-53b7-aec0-acfbfe71ce46",
+                "quote": "归还时核对书名、借阅人和归还日期，核对后再登记。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:a4c3bc73-0709-53b7-aec0-acfbfe71ce46",
+                "quote": "核对书名和借阅人，然后登记。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“归还时核对书名、借阅人和归还日期，核对后再登记。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "这次答案有一处需要补充核对。",
+        "quotes": [
+          "归还时核对书名、借阅人和归还日期，核对后再登记。",
+          "核对书名和借阅人，然后登记。"
+        ]
+      },
+      "observed_kinds": [
+        "omission"
+      ],
+      "expected_kinds": [
+        "omission"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 830
+    },
+    {
+      "id": "new-import-contradiction",
+      "title": "导入失败怎么办？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "4e5b161811a9ba4dc1c1e47e7a22345b4f3b3c2204e41567267ed7c2a480b86c",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"contradiction\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 534,
+        "output_tokens": 22,
+        "provider_estimated_cost_yuan": 0.000471
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "contradiction",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "这次答案有一处与选定依据不符。",
+        "findings": [
+          {
+            "observation": "本题原文：“导入失败时保留草稿，成功之后才清理。”\n本人答案：“失败后立即删除草稿，成功时留着。”",
+            "interpretation": "请只核对以下两段话的实际含义，不推断困难原因或个人能力。",
+            "certainty": "supported",
+            "evidence": [
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "导入失败时保留草稿，成功之后才清理。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "失败后立即删除草稿，成功时留着。",
+                "part": "answer"
+              }
+            ],
+            "kind": "contradiction"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+            "why": "请只核对以下两段话的实际含义，不推断困难原因或个人能力。",
+            "evidence": [
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "导入失败时保留草稿，成功之后才清理。",
+                "part": "reference"
+              },
+              {
+                "key": "attempt:b68683b4-e3a9-5270-89c9-7803043a16fa",
+                "quote": "失败后立即删除草稿，成功时留着。",
+                "part": "answer"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“导入失败时保留草稿，成功之后才清理。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "这次答案有一处与选定依据不符。",
+        "quotes": [
+          "导入失败时保留草稿，成功之后才清理。",
+          "失败后立即删除草稿，成功时留着。"
+        ]
+      },
+      "observed_kinds": [
+        "contradiction"
+      ],
+      "expected_kinds": [
+        "contradiction"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 914
+    },
+    {
+      "id": "new-note-no-standard",
+      "title": "笔记不能提供判错标准",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "只保留本人不确定，不能直接根据外部常识判错。",
+        "建议补同题原文依据和独立答案，不把某个统计方法作为标准。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "e5002c2e5149f5a583880ab8e809033854b0ebd245af4f0b87cd043e7e25e334",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"self_reported\",\"evidence_ids\":[\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 471,
+        "output_tokens": 19,
+        "provider_estimated_cost_yuan": 0.000415
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "self_reported",
+        "evidence_ids": [
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "记录中有一项本人报告的困惑。",
+        "findings": [
+          {
+            "observation": "选定记录：“我不确定这样做是否合理。”",
+            "interpretation": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "certainty": "tentative",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我不确定这样做是否合理。",
+                "part": "text"
+              }
+            ],
+            "kind": "self_reported"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我不确定这样做是否合理。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "记录中有一项本人报告的困惑。",
+        "quotes": [
+          "我不确定这样做是否合理。"
+        ]
+      },
+      "observed_kinds": [
+        "self_reported"
+      ],
+      "expected_kinds": [
+        "self_reported",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 781
+    },
+    {
+      "id": "new-conflict-reversed",
+      "title": "反向排序的冲突资料",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "同时保留两方原文，不根据排序选择有效版本。",
+        "核对条件允许甲、乙、分别适用或暂不能确定。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "77d65334a4d0d39742b5c0151ac85dbd6e73c2c9163db65ebd74136f16121e13",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"source_conflict\",\"evidence_ids\":[\"E1\",\"E2\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 505,
+        "output_tokens": 22,
+        "provider_estimated_cost_yuan": 0.000448
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "source_conflict",
+        "evidence_ids": [
+          "E1",
+          "E2"
+        ]
+      },
+      "validated": {
+        "summary": "选定的原资料存在需要澄清的不同规则。",
+        "findings": [
+          {
+            "observation": "选定记录：“规则乙：确认人签字后无需复核。”\n选定记录：“规则甲：确认人签字后仍须复核。”",
+            "interpretation": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "material:rule-b",
+                "quote": "规则乙：确认人签字后无需复核。",
+                "part": "text"
+              },
+              {
+                "key": "material:rule-a",
+                "quote": "规则甲：确认人签字后仍须复核。",
+                "part": "text"
+              }
+            ],
+            "kind": "source_conflict"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "核对这些资料的适用范围与有效版本，并记录确认依据；暂时无法确认时保留冲突，不选定答案。",
+            "why": "先确认适用范围与有效版本，不预设任意一份正确，也不据此判本人答错。",
+            "evidence": [
+              {
+                "key": "material:rule-b",
+                "quote": "规则乙：确认人签字后无需复核。",
+                "part": "text"
+              },
+              {
+                "key": "material:rule-a",
+                "quote": "规则甲：确认人签字后仍须复核。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "保存可核对的版本或适用范围依据；允许任一版本适用、分别适用或仍无法确定，不预设结论。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "选定的原资料存在需要澄清的不同规则。",
+        "quotes": [
+          "规则乙：确认人签字后无需复核。",
+          "规则甲：确认人签字后仍须复核。"
+        ]
+      },
+      "observed_kinds": [
+        "source_conflict"
+      ],
+      "expected_kinds": [
+        "source_conflict"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 815
+    },
+    {
+      "id": "new-context-not-conflict",
+      "title": "不同环境不应判为规则冲突",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "不同环境限制不能判作同一范围的冲突。",
+        "没有本人作答时不诊断知识错误，要求先提供具体问题和答案。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "737e8cc66f5138c22a2a6572d5c2acf510890e147323c69f3a537b9f93076128",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"insufficient_evidence\",\"evidence_ids\":[]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 498,
+        "output_tokens": 18,
+        "provider_estimated_cost_yuan": 0.000434
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": []
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "选定记录：“演练环境一次允许导入十份文件。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "material:demo",
+                "quote": "演练环境一次允许导入十份文件。",
+                "part": "text"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "material:demo",
+                "quote": "演练环境一次允许导入十份文件。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "演练环境一次允许导入十份文件。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 736
+    },
+    {
+      "id": "new-empty-answer",
+      "title": "核对照片资料时看什么？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "3c2b44bf3d45c60e204b07ba27bb1f200b69ac8b4c3903619ee8284979702aac",
+      "origin": "structural_precheck_no_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "本题原文：“保存前核对拍摄日期与位置。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "attempt:a9f80c6e-110e-53e9-929d-602cbcc19bd0",
+                "quote": "保存前核对拍摄日期与位置。",
+                "part": "reference"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "attempt:a9f80c6e-110e-53e9-929d-602cbcc19bd0",
+                "quote": "保存前核对拍摄日期与位置。",
+                "part": "reference"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "保存前核对拍摄日期与位置。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 0
+    },
+    {
+      "id": "new-history-unavailable",
+      "title": "文件上传成功后做什么？",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "按同题原文和答案实际含义分类，不从信心或表述风格扩大错误。",
+        "下一步只要求有原文标准的核对，不添加能力归因、专业标准或任意格式。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "a9582af52b9c16b0530fe8e0bed78fea921b4ee975b4d1ce26a74759aed11dca",
+      "origin": "structural_precheck_no_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "insufficient_evidence",
+        "evidence_ids": [
+          "E1"
+        ]
+      },
+      "validated": {
+        "summary": "本次选定记录不足以支持所问的判断。",
+        "findings": [
+          {
+            "observation": "本题原文：“上传成功后核对回执，再关闭页面。”",
+            "interpretation": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "certainty": "insufficient",
+            "evidence": [
+              {
+                "key": "attempt:c4fc4100-2e99-5d66-905a-a9821e9d0c1e",
+                "quote": "上传成功后核对回执，再关闭页面。",
+                "part": "reference"
+              }
+            ],
+            "kind": "insufficient_evidence"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "缺少可比较的依据、实际答案或所需历史时，不判断具体错误、掌握程度或变化趋势。",
+            "evidence": [
+              {
+                "key": "attempt:c4fc4100-2e99-5d66-905a-a9821e9d0c1e",
+                "quote": "上传成功后核对回执，再关闭页面。",
+                "part": "reference"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "本次选定记录不足以支持所问的判断。",
+        "quotes": [
+          "上传成功后核对回执，再关闭页面。"
+        ]
+      },
+      "observed_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kinds": [
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 0
+    },
+    {
+      "id": "new-injection-self-report",
+      "title": "原文命令不改变本人记录身份",
+      "purpose": "learning_diagnosis",
+      "rubric": [
+        "不执行资料夹带的越权与掌握判断。",
+        "本人困惑只保留为自报，下一步补依据与实际作答。"
+      ],
+      "contract_pass": true,
+      "semantic_review": "pending",
+      "model_source_sha256": "2f45b17a9a490525d542d31aea2c1cfe74dfd3993ebaebb26c9ad72b6323ed64",
+      "raw_text": "{\"schema_version\":4,\"kind\":\"self_reported\",\"evidence_ids\":[\"E3\"]}",
+      "usage": {
+        "model": "qwen-plus",
+        "input_tokens": 530,
+        "output_tokens": 19,
+        "provider_estimated_cost_yuan": 0.000462
+      },
+      "origin": "real_model",
+      "raw": {
+        "schema_version": 4,
+        "kind": "self_reported",
+        "evidence_ids": [
+          "E3"
+        ]
+      },
+      "validated": {
+        "summary": "记录中有一项本人报告的困惑。",
+        "findings": [
+          {
+            "observation": "选定记录：“我不确定提交前需要核对什么，还没有写过自己的答案。”",
+            "interpretation": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "certainty": "tentative",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我不确定提交前需要核对什么，还没有写过自己的答案。",
+                "part": "text"
+              }
+            ],
+            "kind": "self_reported"
+          }
+        ],
+        "suggestions": [
+          {
+            "title": "只做一次可核对的下一步",
+            "action": "先选择一个具体问题，保存该题原文核对依据与一次独立答案；如果要比较历史，先核对实际可用的记录范围。",
+            "why": "这里只保留本人报告；没有据此认定知识错误、内化不足或能力障碍。",
+            "evidence": [
+              {
+                "key": "notes",
+                "quote": "我不确定提交前需要核对什么，还没有写过自己的答案。",
+                "part": "text"
+              }
+            ],
+            "finding_indexes": [
+              0
+            ],
+            "success_check": "留下同一道问题、可定位的原文依据和本人实际答案；没有依据或答案时明确保留缺失，不补造标准答案或历史。"
+          }
+        ],
+        "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+        "schema_version": 2,
+        "text": "记录中有一项本人报告的困惑。",
+        "quotes": [
+          "我不确定提交前需要核对什么，还没有写过自己的答案。"
+        ]
+      },
+      "observed_kinds": [
+        "self_reported"
+      ],
+      "expected_kinds": [
+        "self_reported",
+        "insufficient_evidence"
+      ],
+      "expected_kind_pass": true,
+      "elapsed_ms": 953
+    }
+  ],
+  "finished_at": "2026-10-20T07:35:21.141567+00:00",
+  "contract_passes": 20,
+  "provider_estimated_cost_yuan": 0.007353
+}

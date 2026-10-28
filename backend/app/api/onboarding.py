@@ -17,6 +17,7 @@ from app.core.dependencies import get_current_user_id
 from app.core.exceptions import NotFoundException, ValidationException
 from app.engines.daily_preferences import user_daily_preferences
 from app.engines.memory_engine import create_from_source
+from app.engines.onboarding_engine import save_onboarding_graph
 from app.engines.learning_paths_seed import assign_path, get_day_task, get_path
 from app.engines.privacy_scope import (
     PRIVACY_SOURCE_DESCRIPTIONS,
@@ -26,6 +27,7 @@ from app.engines.privacy_scope import (
 )
 from app.engines.workspace_engine import append_event, create_project, create_workspace
 from app.models.memory import MemoryEntry
+from app.models.onboarding_submission import OnboardingSubmission
 from app.models.user import User
 from app.schemas.common import ApiResponse
 
@@ -114,15 +116,83 @@ class OnboardingProjectInput(BaseModel):
         return value.strip() or None if value else None
 
 
+class _OnboardingTitledInput(BaseModel):
+    title: str = Field(min_length=1, max_length=240)
+    description: str = Field(default="", max_length=4000)
+
+    @field_validator("title")
+    @classmethod
+    def title_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("title cannot be empty")
+        return value.strip()
+
+
+class OnboardingGoalInput(_OnboardingTitledInput):
+    target_metric: dict | None = None
+
+
+class OnboardingPlanInput(_OnboardingTitledInput):
+    period_type: Literal["weekly", "monthly", "quarterly"] = "weekly"
+    total_weeks: int = Field(ge=1, le=104)
+    milestones: list[str] = Field(default_factory=list, max_length=12)
+
+    @field_validator("milestones")
+    @classmethod
+    def normalize_milestones(cls, values: list[str]) -> list[str]:
+        return [value.strip() for value in values if value.strip()]
+
+
+class OnboardingTaskInput(_OnboardingTitledInput):
+    client_key: str = Field(pattern=r"^task-[0-2]$")
+    priority: Literal["high", "medium", "low"] = "medium"
+    due_at: datetime | None = None
+
+    @field_validator("due_at")
+    @classmethod
+    def require_timezone(cls, value: datetime | None) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            raise ValueError("due_at requires a timezone")
+        return value
+
+
+class OnboardingLearningInput(BaseModel):
+    title: str = Field(min_length=1, max_length=240)
+    summary: str = Field(default="", max_length=4000)
+    kind: Literal["article", "course", "note", "book"] = "note"
+    duration_minutes: int | None = Field(default=None, ge=1, le=1440)
+
+    @field_validator("title")
+    @classmethod
+    def title_not_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("title cannot be empty")
+        return value.strip()
+
+
 class ContextCompleteRequest(_RawInputRequest):
     profile: PersonalContext = Field(default_factory=PersonalContext)
     workspace: OnboardingWorkspaceInput | None = None
     project: OnboardingProjectInput | None = None
+    client_request_id: uuid.UUID | None = None
+    goal: OnboardingGoalInput | None = None
+    plan: OnboardingPlanInput | None = None
+    tasks: list[OnboardingTaskInput] = Field(default_factory=list, max_length=3)
+    learning: OnboardingLearningInput | None = None
 
     @model_validator(mode="after")
     def validate_project_workspace_dependency(self) -> "ContextCompleteRequest":
         if self.project is not None and self.workspace is None:
             raise ValueError("project requires a confirmed workspace")
+        if self.client_request_id is not None and self.workspace is None:
+            raise ValueError("a retryable submission requires a workspace")
+        if self.goal is not None or self.plan is not None or self.tasks or self.learning is not None:
+            if self.workspace is None or self.client_request_id is None:
+                raise ValueError("confirmed objects require workspace and client_request_id")
+        if self.plan is not None and self.goal is None:
+            raise ValueError("plan requires a confirmed goal")
+        if len({task.client_key for task in self.tasks}) != len(self.tasks):
+            raise ValueError("task client keys must be unique")
         return self
 
 
@@ -132,6 +202,8 @@ class ContextCompleteResponse(BaseModel):
     workspace_id: str | None = None
     project_id: str | None = None
     saved: bool
+    client_request_id: str | None = None
+    objects: list[dict] = Field(default_factory=list)
 
 
 class DailyPreferencesUpdateRequest(BaseModel):
@@ -397,6 +469,9 @@ async def complete_context(
     session: AsyncSession = Depends(get_db),
 ) -> ApiResponse[ContextCompleteResponse]:
     """Commit confirmed onboarding facts, their event trail, and the raw input Memory."""
+    if payload.client_request_id is not None:
+        result = await save_onboarding_graph(session, uid=uuid.UUID(user_id), payload=payload.model_dump(mode="json"))
+        return ApiResponse(success=True, data=ContextCompleteResponse(**result))
     raw_input = payload.raw_input.strip()
     normalized_user_id = uuid.UUID(user_id)
     result = await session.execute(select(User).where(User.id == normalized_user_id))
@@ -523,6 +598,21 @@ async def complete_context(
     )
 
 
+@router.get("/context/submissions/{client_request_id}", response_model=ApiResponse[ContextCompleteResponse])
+async def get_context_submission(
+    client_request_id: uuid.UUID,
+    user_id: str = Depends(get_current_user_id),
+    session: AsyncSession = Depends(get_db),
+) -> ApiResponse[ContextCompleteResponse]:
+    receipt = (await session.execute(select(OnboardingSubmission).where(
+        OnboardingSubmission.user_id == uuid.UUID(user_id),
+        OnboardingSubmission.client_request_id == client_request_id,
+    ))).scalar_one_or_none()
+    if receipt is None:
+        raise NotFoundException("Onboarding submission")
+    return ApiResponse(success=True, data=ContextCompleteResponse(**receipt.result))
+
+
 @router.get("/daily-preferences", response_model=ApiResponse[DailyPreferencesResponse])
 async def get_daily_preferences(
     user_id: str = Depends(get_current_user_id),
@@ -540,7 +630,7 @@ async def update_daily_preferences(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db),
 ) -> ApiResponse[DailyPreferencesResponse]:
-    user = (await session.execute(select(User).where(User.id == uuid.UUID(user_id)))).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.id == uuid.UUID(user_id)).with_for_update().execution_options(populate_existing=True))).scalar_one_or_none()
     if user is None:
         raise NotFoundException("User")
     settings = dict(user.settings or {})
@@ -568,7 +658,7 @@ async def update_privacy_scope(
     user_id: str = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db),
 ) -> ApiResponse[PrivacyScopeResponse]:
-    user = (await session.execute(select(User).where(User.id == uuid.UUID(user_id)))).scalar_one_or_none()
+    user = (await session.execute(select(User).where(User.id == uuid.UUID(user_id)).with_for_update().execution_options(populate_existing=True))).scalar_one_or_none()
     if user is None:
         raise NotFoundException("User")
     settings = dict(user.settings or {})

@@ -1,0 +1,114 @@
+{
+  "request_id": "e8069ad8-cf66-4023-8194-eedd96d19a8b",
+  "kind": "learning_diagnose",
+  "status": "completed",
+  "redacted": false,
+  "error": null,
+  "input": {
+    "kind": "learning_diagnose",
+    "text": "",
+    "answer": "",
+    "consent": true,
+    "item_id": "8a073dde-4762-4ea6-a4a8-8b949435c91b",
+    "question": "只核对本题实际答案与给定原文。",
+    "timezone": "Asia/Shanghai",
+    "request_id": "e8069ad8-cf66-4023-8194-eedd96d19a8b",
+    "base_version": 1,
+    "workspace_id": "03eaf67b-0929-4d46-9dcc-b96098c5e72e",
+    "evidence_keys": [
+      "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac"
+    ]
+  },
+  "source": {
+    "digest": "0bbda90706b45135a3165499de2d9ae7580e19ea368df9ae574862355c360efd",
+    "version": 1,
+    "evidence": [
+      {
+        "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+        "role": "recall_record",
+        "text": "问题：归档前检查什么，缺项如何处理？\n核对依据：📚归档前检查文件名称、来源和日期。缺少任一项时先补齐再归档。\n本人答案：检查文件名称和来源，缺少就补齐再归档。\n本人自评：None\n理解：\n卡点：\n下一步：\n本人声明的作答方式：看过原文或笔记",
+        "label": "已保存答案 · 归档前检查什么，缺项如何处理？",
+        "recall": {
+          "answer": "检查文件名称和来源，缺少就补齐再归档。",
+          "question": "归档前检查什么，缺项如何处理？",
+          "reference": "📚归档前检查文件名称、来源和日期。缺少任一项时先补齐再归档。",
+          "self_report": "本人自评：None\n理解：\n卡点：\n下一步：\n本人声明的作答方式：看过原文或笔记"
+        },
+        "attempt_id": "5c161e42-28eb-564f-83cb-00b25bd13cac",
+        "answered_at": "2026-10-20T07:42:37.653062+00:00",
+        "completed_at": null
+      }
+    ],
+    "document_id": "5c84ff15-e8c3-5cc8-bfe4-d565825b60f6",
+    "evidence_keys": [
+      "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac"
+    ]
+  },
+  "result": {
+    "summary": "这次答案有一处需要补充核对。",
+    "findings": [
+      {
+        "observation": "本题原文：“📚归档前检查文件名称、来源和日期。”\n本题原文：“缺少任一项时先补齐再归档。”\n本人答案：“检查文件名称和来源，缺少就补齐再归档。”",
+        "interpretation": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+        "certainty": "supported",
+        "evidence": [
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "📚归档前检查文件名称、来源和日期。",
+            "part": "reference"
+          },
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "缺少任一项时先补齐再归档。",
+            "part": "reference"
+          },
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "检查文件名称和来源，缺少就补齐再归档。",
+            "part": "answer"
+          }
+        ],
+        "kind": "omission"
+      }
+    ],
+    "suggestions": [
+      {
+        "title": "只做一次可核对的下一步",
+        "action": "围绕同一道问题再独立写一次自己的回答，随后对照本次原文，记录保留或修正了什么。",
+        "why": "请只核对以下原文要求是否在本次答案中完整表达，不据此判断长期掌握。",
+        "evidence": [
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "📚归档前检查文件名称、来源和日期。",
+            "part": "reference"
+          },
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "缺少任一项时先补齐再归档。",
+            "part": "reference"
+          },
+          {
+            "key": "attempt:5c161e42-28eb-564f-83cb-00b25bd13cac",
+            "quote": "检查文件名称和来源，缺少就补齐再归档。",
+            "part": "answer"
+          }
+        ],
+        "finding_indexes": [
+          0
+        ],
+        "success_check": "保存同题的独立答案与原文核对记录；逐项核对原文：“📚归档前检查文件名称、来源和日期。；缺少任一项时先补齐再归档。”；按实际含义核对，等价改写可保留，不要求逐字背诵。"
+      }
+    ],
+    "limitations": "仅依据本次选定记录核对本题或保留不足；未评估长期能力、心理状态、记忆变化或学习效果。",
+    "schema_version": 2,
+    "text": "这次答案有一处需要补充核对。",
+    "quotes": [
+      "📚归档前检查文件名称、来源和日期。",
+      "缺少任一项时先补齐再归档。",
+      "检查文件名称和来源，缺少就补齐再归档。"
+    ],
+    "assessment_mode": "evidence_selection"
+  },
+  "created_at": "2026-10-20T07:42:37.802415+00:00",
+  "prompt_version": "v3"
+}

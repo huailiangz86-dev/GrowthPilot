@@ -15,6 +15,7 @@ from app.core.exceptions import NotFoundException, ValidationException
 from app.engines.task_engine import block_task, complete_task, create_task, defer_task, get_task, update_task
 from app.engines.workspace_engine import get_project, get_workspace
 from app.models.task import Task
+from app.models.agent_conversation import AgentConversation, AgentTurn
 from app.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -116,9 +117,10 @@ class TaskResponse(BaseModel):
     completed_at: str | None
     created_at: str
     updated_at: str
+    agent_source: dict | None = None
 
 
-def _response(task: Task) -> TaskResponse:
+def _response(task: Task, agent_source: dict | None = None) -> TaskResponse:
     return TaskResponse(
         id=str(task.id), workspace_id=str(task.workspace_id), project_id=str(task.project_id) if task.project_id else None,
         goal_id=str(task.goal_id) if task.goal_id else None, plan_id=str(task.plan_id) if task.plan_id else None,
@@ -126,6 +128,7 @@ def _response(task: Task) -> TaskResponse:
         energy_required=task.energy_required, time_block=task.time_block,
         due_at=task.due_at.isoformat() if task.due_at else None, completed_at=task.completed_at.isoformat() if task.completed_at else None,
         created_at=task.created_at.isoformat(), updated_at=task.updated_at.isoformat(),
+        agent_source=agent_source,
     )
 
 
@@ -164,7 +167,13 @@ async def list_tasks(workspace_id: str, user_id: str = Depends(get_current_user_
     if workspace is None:
         raise NotFoundException("Workspace")
     result = await session.execute(select(Task).where(Task.user_id == uid, Task.workspace_id == workspace.id, Task.deleted_at.is_(None)).order_by(Task.due_at.asc().nullslast(), Task.created_at.desc()))
-    return ApiResponse(success=True, data=[_response(item) for item in result.scalars().all()])
+    items = result.scalars().all()
+    origins = (await session.execute(select(AgentTurn.confirmed_task_id, AgentTurn.id, AgentTurn.conversation_id)
+        .join(AgentConversation, AgentConversation.id == AgentTurn.conversation_id)
+        .where(AgentConversation.user_id == uid, AgentConversation.workspace_id == workspace.id,
+               AgentTurn.confirmed_task_id.in_([item.id for item in items])))).all() if items else []
+    by_task = {task_id: {"conversation_id": str(cid), "turn_id": str(tid)} for task_id, tid, cid in origins}
+    return ApiResponse(success=True, data=[_response(item, by_task.get(item.id)) for item in items])
 
 
 @router.patch("/{task_id}", response_model=ApiResponse[TaskResponse])

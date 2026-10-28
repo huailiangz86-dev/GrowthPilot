@@ -7,9 +7,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import settings
 from app.core.database import Base
+from app.models.item_help import ItemHelp  # noqa: F401
 
 # Import all models
+from app.models.reminders import PushSubscription, ReminderDelivery  # noqa: F401
+from app.models.workspace_fact import WorkspaceFact, AnalysisSnapshot  # noqa: F401
 from app.models.user import User  # noqa: F401
+from app.models.personal_work import PersonalDocument, DocumentRevision, ScheduleBlock, PersonalCommandReceipt  # noqa: F401
+from app.models.personal_life import LifeRecord, PersonalHabit, LifeRevision, LifeWorkspaceReference, LifeCommandReceipt  # noqa: F401
 from app.models.record import Record  # noqa: F401
 from app.models.review import Review  # noqa: F401
 from app.models.tag_definition import TagDefinition  # noqa: F401
@@ -27,6 +32,8 @@ from app.models.knowledge import (  # noqa: F401
     UserBookmark,
 )
 from app.models.memory import MemoryEntry  # noqa: F401
+from app.models.agent_conversation import AgentConversation, AgentTurn  # noqa: F401
+from app.models.onboarding_submission import OnboardingSubmission  # noqa: F401
 from app.models.workspace import Project, Workspace, WorkspaceEvent  # noqa: F401
 from app.models.task import Task  # noqa: F401
 from app.models.goal import Goal  # noqa: F401

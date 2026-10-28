@@ -11,13 +11,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user_id
-from app.core.exceptions import NotFoundException, ValidationException
+from app.core.exceptions import AppException, NotFoundException, ValidationException
+from app.engines.mutation_receipts import prepare_mutation, record_mutation
 from app.engines.workspace_engine import (
     archive_project,
     archive_workspace,
     create_project,
     create_workspace,
     get_project,
+    project_query,
     get_workspace,
     update_project,
     update_workspace,
@@ -105,6 +107,7 @@ class WorkspaceUpdateRequest(BaseModel):
 
 
 class ProjectCreateRequest(BaseModel):
+    request_id: uuid.UUID | None = None
     workspace_id: str
     name: str = Field(min_length=1, max_length=160)
     description: str = Field(default="", max_length=4000)
@@ -131,6 +134,8 @@ class ProjectCreateRequest(BaseModel):
 
 
 class ProjectUpdateRequest(BaseModel):
+    request_id: uuid.UUID | None = None
+    expected_updated_at: datetime | None = None
     name: str | None = Field(default=None, min_length=1, max_length=160)
     description: str | None = Field(default=None, max_length=4000)
     status: ProjectStatus | None = None
@@ -156,8 +161,13 @@ class ProjectUpdateRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_has_changes(self) -> "ProjectUpdateRequest":
-        if not self.model_fields_set:
+        if not self.model_fields_set - {"request_id", "expected_updated_at"}:
             raise ValueError("至少提供一项需要修改的内容")
+        if self.expected_updated_at is not None and self.expected_updated_at.utcoffset() is None:
+            raise ValueError("项目版本时间必须包含时区")
+        for field in ("name", "description", "status", "priority", "progress"):
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} 不能为 null")
         return self
 
 
@@ -396,6 +406,9 @@ async def create_project_endpoint(
     workspace = await get_workspace(session, normalized_user_id, _parse_id(payload.workspace_id, "Workspace"))
     if workspace is None:
         raise NotFoundException("Workspace")
+    fingerprint, receipt = await prepare_mutation(session, normalized_user_id, workspace.id, payload.request_id, "project_create", payload)
+    if receipt is not None:
+        return ApiResponse(success=True, data=ProjectResponse.model_validate(receipt))
     project = await create_project(
         session,
         workspace=workspace,
@@ -407,25 +420,45 @@ async def create_project_endpoint(
         next_action=payload.next_action,
         due_at=payload.due_at,
     )
-    await session.commit()
+    await session.flush()
     await session.refresh(project)
+    result = _project_response(project)
+    record_mutation(session, normalized_user_id, workspace.id, payload.request_id, fingerprint, result)
+    await session.commit()
+    return ApiResponse(success=True, data=result)
+
+
+@projects_router.get("/{project_id}", response_model=ApiResponse[ProjectResponse])
+async def project_detail(project_id: str, workspace_id: str | None = None, user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db)):
+    project = await get_project(session, _parse_user_id(user_id), _parse_id(project_id, "Project"))
+    if project is None or workspace_id is not None and project.workspace_id != _parse_id(workspace_id, "Workspace"):
+        raise NotFoundException("Project")
     return ApiResponse(success=True, data=_project_response(project))
 
 
 @projects_router.patch("/{project_id}", response_model=ApiResponse[ProjectResponse])
-async def update_project_endpoint(
-    project_id: str,
-    payload: ProjectUpdateRequest,
-    user_id: str = Depends(get_current_user_id),
-    session: AsyncSession = Depends(get_db),
-) -> ApiResponse[ProjectResponse]:
-    project = await get_project(session, _parse_user_id(user_id), _parse_id(project_id, "Project"))
+async def update_project_endpoint(project_id: str, payload: ProjectUpdateRequest,
+                                  user_id: str = Depends(get_current_user_id), session: AsyncSession = Depends(get_db)):
+    uid, pid = _parse_user_id(user_id), _parse_id(project_id, "Project")
+    project = await get_project(session, uid, pid)
     if project is None:
         raise NotFoundException("Project")
-    await update_project(session, project, payload.model_dump(exclude_unset=True))
-    await session.commit()
+    fingerprint, receipt = await prepare_mutation(session, uid, project.workspace_id, payload.request_id, f"project_update:{pid}", payload)
+    if receipt is not None:
+        return ApiResponse(success=True, data=ProjectResponse.model_validate(receipt))
+    project = await session.scalar(project_query(uid, pid).with_for_update(of=Project).execution_options(populate_existing=True))
+    if project is None:
+        raise NotFoundException("Project")
+    if payload.expected_updated_at is not None and payload.expected_updated_at != project.updated_at:
+        raise AppException("PROJECT_EDIT_CONFLICT", "其他页面已有更新。当前输入已保留，请先核对最新项目。", 409)
+    changes = payload.model_dump(exclude_unset=True, exclude={"request_id", "expected_updated_at"})
+    await update_project(session, project, changes)
+    await session.flush()
     await session.refresh(project)
-    return ApiResponse(success=True, data=_project_response(project))
+    result = _project_response(project)
+    record_mutation(session, uid, project.workspace_id, payload.request_id, fingerprint, result)
+    await session.commit()
+    return ApiResponse(success=True, data=result)
 
 
 @projects_router.post("/{project_id}/archive", response_model=ApiResponse[ProjectResponse])

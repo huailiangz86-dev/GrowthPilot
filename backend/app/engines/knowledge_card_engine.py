@@ -129,6 +129,7 @@ async def add_knowledge_card_to_learning(
             "summary": card.content or card.source_url or "",
             "kind": "article" if card.source_type == "url" else "note",
             "duration_minutes": None,
+            "source_url": card.source_url,
         },
     )
     card.learning_item_id = learning_item.id
